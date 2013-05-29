@@ -105,7 +105,8 @@ int main(int argc, char **argv) {
 	printf("Content-Type: image/png\n\n");
 
 	/* print PNG data */
-	gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL, NULL);
+	gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL,
+			"tEXt::comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo", NULL);
 	fwrite (buffer, 1, size, stdout);
 
 	if (rc)
