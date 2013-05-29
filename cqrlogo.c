@@ -57,8 +57,8 @@ GdkPixbuf * encode_qrcode (char *text) {
 int main(int argc, char **argv) {
 	char * http_referer, * server_name, * pattern;
 	regex_t preg;
-	size_t nmatch;
-	regmatch_t pmatch[2];
+	size_t nmatch = 1;
+	regmatch_t pmatch[1];
 	int rc;
 
 	GdkPixbuf *pixbuf;
@@ -69,16 +69,16 @@ int main(int argc, char **argv) {
 	/* check if we have environment variables from CGI */
 	if ((http_referer = getenv("HTTP_REFERER")) == NULL ||
 			(server_name = getenv("SERVER_NAME")) == NULL) {
-		printf("This is a CGI executable. Running without a web service is not supported.\n"
+		fprintf(stderr, "This is a CGI executable. Running without a web service is not supported.\n"
 				"Note that HTTP_REFERER and SERVER_NAME need to be defined.\n");
 		return EXIT_FAILURE;
 	} 
 	
 	/* prepare pattern matching */
-	pattern = malloc(11 + strlen(server_name));
+	pattern = malloc(10 + strlen(server_name));
 	sprintf(pattern, "^http://%s/", server_name);
 	if ((rc = regcomp(&preg, pattern, 0)) != 0)
-		printf("regcomp() failed, returning nonzero (%d)\n", rc);
+		fprintf(stderr, "regcomp() failed, returning nonzero (%d)\n", rc);
 
 	/* check if the QR-Code is for the correct server */
 	if ((rc = regexec(&preg, http_referer, nmatch, pmatch, 0)) != 0) {
@@ -89,19 +89,23 @@ int main(int argc, char **argv) {
 	regfree(&preg);
 	free(pattern);
 	
-	if (pixbuf = encode_qrcode(http_referer)) {
-		/* print HTTP header */
-		printf("Content-Type: image/png\n\n");
-
-		/* print PNG data */
-		gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL, NULL);
-		fwrite (buffer, 1, size, stdout);
-	} else {
-		printf("Error?!\n");
+	if ((pixbuf = encode_qrcode(http_referer)) == NULL) {
+		if ((pixbuf = encode_qrcode(server_name)) == NULL) {
+			fprintf(stderr, "Could not generate QR-Code.\n");
+			return EXIT_FAILURE;
+		}
 	}
+
+	/* print HTTP header */
+	printf("Content-Type: image/png\n\n");
+
+	/* print PNG data */
+	gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL, NULL);
+	fwrite (buffer, 1, size, stdout);
 
 	if (rc)
 		free(http_referer);
+	g_object_unref(pixbuf);
 
 	return EXIT_SUCCESS;
 }
