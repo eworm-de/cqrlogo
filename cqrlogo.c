@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 	free(pattern);
 
 	/* initialize type system for glib < 2.36 */
-#ifndef GLIB_VERSION_2_26
+#ifndef GLIB_VERSION_2_36
 	g_type_init();
 #endif
 	
