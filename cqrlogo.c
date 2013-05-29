@@ -89,10 +89,10 @@ int main(int argc, char **argv) {
 	regfree(&preg);
 	free(pattern);
 
-	/* initialize type system
-	 * Since GLib 2.36, the type system is initialised automatically
-	 * and this function does nothing. */
+	/* initialize type system for glib < 2.36 */
+#ifndef GLIB_VERSION_2_26
 	g_type_init();
+#endif
 	
 	if ((pixbuf = encode_qrcode(http_referer)) == NULL) {
 		if ((pixbuf = encode_qrcode(server_name)) == NULL) {
