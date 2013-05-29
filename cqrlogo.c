@@ -13,7 +13,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <qrencode.h>
 
-#define QRCODE_SCALE	3
+#define QRCODE_SCALE	2
 
 GdkPixbuf * encode_qrcode (char *text) {
        QRcode *qrcode;
