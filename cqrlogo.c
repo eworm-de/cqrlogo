@@ -66,6 +66,7 @@ int main(int argc, char **argv) {
 	gchar *buffer;
 	gsize size;
 
+	/* check if we have environment variables from CGI */
 	if ((http_referer = getenv("HTTP_REFERER")) == NULL ||
 			(server_name = getenv("SERVER_NAME")) == NULL) {
 		printf("This is a CGI executable. Running without a web service is not supported.\n"
@@ -73,13 +74,14 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	} 
 	
+	/* prepare pattern matching */
 	pattern = malloc(11 + strlen(server_name));
 	sprintf(pattern, "^http://%s/", server_name);
 	if ((rc = regcomp(&preg, pattern, 0)) != 0)
 		printf("regcomp() failed, returning nonzero (%d)\n", rc);
 
+	/* check if the QR-Code is for the correct server */
 	if ((rc = regexec(&preg, http_referer, nmatch, pmatch, 0)) != 0) {
-		/* stolen... */
 		http_referer = malloc(44 + strlen(server_name));
 		sprintf(http_referer, "This QR Code has been stolen from http://%s/!", server_name);
 	}
