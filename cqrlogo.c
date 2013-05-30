@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
 
 	/* print PNG data */
 	gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL,
+			"compression", "9",
 			"tEXt::comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo",
 			"tEXt::referer", http_referer, NULL);
 	fwrite (buffer, 1, size, stdout);
