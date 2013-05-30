@@ -75,8 +75,8 @@ int main(int argc, char **argv) {
 	} 
 	
 	/* prepare pattern matching */
-	pattern = malloc(22 + strlen(server_name));
-	sprintf(pattern, "^[hH][tT][tT][pP]://%s/", server_name);
+	pattern = malloc(28 + strlen(server_name));
+	sprintf(pattern, "^[hH][tT][tT][pP][sS]\\?://%s/", server_name);
 	if ((rc = regcomp(&preg, pattern, 0)) != 0)
 		fprintf(stderr, "regcomp() failed, returning nonzero (%d)\n", rc);
 
