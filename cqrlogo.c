@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 	regex_t preg;
 	size_t nmatch = 1;
 	regmatch_t pmatch[1];
-	int rc;
+	int rc = 0;
 
 	GdkPixbuf *pixbuf;
 
@@ -67,27 +67,30 @@ int main(int argc, char **argv) {
 	gsize size;
 
 	/* check if we have environment variables from CGI */
-	if ((http_referer = getenv("HTTP_REFERER")) == NULL ||
-			(server_name = getenv("SERVER_NAME")) == NULL) {
+	if ((server_name = getenv("SERVER_NAME")) == NULL) {
 		fprintf(stderr, "This is a CGI executable. Running without a web service is not supported.\n"
-				"Note that HTTP_REFERER and SERVER_NAME need to be defined.\n");
+				"Note that SERVER_NAME needs to be defined, for full features the client has\n"
+				"to send referer information.\n");
 		return EXIT_FAILURE;
 	} 
-	
-	/* prepare pattern matching */
-	pattern = malloc(28 + strlen(server_name));
-	sprintf(pattern, "^[hH][tT][tT][pP][sS]\\?://%s/", server_name);
-	if ((rc = regcomp(&preg, pattern, 0)) != 0)
-		fprintf(stderr, "regcomp() failed, returning nonzero (%d)\n", rc);
+	if ((http_referer = getenv("HTTP_REFERER")) == NULL) {
+		http_referer = server_name;
+	} else {	
+		/* prepare pattern matching */
+		pattern = malloc(28 + strlen(server_name));
+		sprintf(pattern, "^[hH][tT][tT][pP][sS]\\?://%s/", server_name);
+		if ((rc = regcomp(&preg, pattern, 0)) != 0)
+			fprintf(stderr, "regcomp() failed, returning nonzero (%d)\n", rc);
 
-	/* check if the QR-Code is for the correct server */
-	if ((rc = regexec(&preg, http_referer, nmatch, pmatch, 0)) != 0) {
-		http_referer = malloc(44 + strlen(server_name));
-		sprintf(http_referer, "This QR Code has been stolen from http://%s/!", server_name);
+		/* check if the QR-Code is for the correct server */
+		if ((rc = regexec(&preg, http_referer, nmatch, pmatch, 0)) != 0) {
+			http_referer = malloc(44 + strlen(server_name));
+			sprintf(http_referer, "This QR Code has been stolen from %s!", server_name);
+		}
+
+		regfree(&preg);
+		free(pattern);
 	}
-
-	regfree(&preg);
-	free(pattern);
 
 	/* initialize type system for glib < 2.36 */
 #ifndef GLIB_VERSION_2_36
@@ -106,7 +109,8 @@ int main(int argc, char **argv) {
 
 	/* print PNG data */
 	gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL,
-			"tEXt::comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo", NULL);
+			"tEXt::comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo",
+			"tEXt::referer", http_referer, NULL);
 	fwrite (buffer, 1, size, stdout);
 
 	if (rc)
