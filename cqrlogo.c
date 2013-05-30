@@ -107,6 +107,15 @@ int main(int argc, char **argv) {
 	/* print HTTP header */
 	printf("Content-Type: image/png\n\n");
 
+	/* cut http_referer, text in png file may have a max length of 79 chars */
+	if (strlen(http_referer) > 79) {
+		if (!rc) {
+			http_referer = strdup(http_referer);
+			rc = 1;
+		}
+		sprintf(http_referer + 76, "...");
+	}
+
 	/* print PNG data */
 	gdk_pixbuf_save_to_buffer (pixbuf, &buffer, &size, "png", NULL,
 			"compression", "9",
