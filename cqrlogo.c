@@ -14,6 +14,7 @@
 #include <qrencode.h>
 
 #define QRCODE_SCALE	2
+#define QRCODE_LEVEL	QR_ECLEVEL_L
 
 GdkPixbuf * encode_qrcode (char *text) {
        QRcode *qrcode;
@@ -22,7 +23,7 @@ GdkPixbuf * encode_qrcode (char *text) {
        gchar *pixel;
        unsigned char *data;
        
-       qrcode = QRcode_encodeData(strlen(text), text, 0, QR_ECLEVEL_L);
+       qrcode = QRcode_encodeData(strlen(text), text, 0, QRCODE_LEVEL);
 
        if (qrcode == NULL)
                return NULL;
