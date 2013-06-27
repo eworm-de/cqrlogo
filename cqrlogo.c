@@ -70,9 +70,13 @@ int main(int argc, char **argv) {
 	int rc = 0;
 
 	GdkPixbuf *pixbuf;
+	int scale = 0;
 
 	gchar *buffer;
 	gsize size;
+
+	/* get query string for later use */
+	char * query_string = getenv("QUERY_STRING");
 
 	/* check if we have environment variables from CGI */
 	if ((server_name = getenv("SERVER_NAME")) == NULL) {
@@ -100,13 +104,20 @@ int main(int argc, char **argv) {
 		free(pattern);
 	}
 
+	/* do we have a special scale? */
+	if (query_string)
+		sscanf(query_string, "scale=%u", &scale);
+
+	if (!scale)
+		scale = QRCODE_SCALE;
+
 	/* initialize type system for glib < 2.36 */
 #ifndef GLIB_VERSION_2_36
 	g_type_init();
 #endif
 	
-	if ((pixbuf = encode_qrcode(http_referer, QRCODE_SCALE)) == NULL) {
-		if ((pixbuf = encode_qrcode(server_name, QRCODE_SCALE)) == NULL) {
+	if ((pixbuf = encode_qrcode(http_referer, scale)) == NULL) {
+		if ((pixbuf = encode_qrcode(server_name, scale)) == NULL) {
 			fprintf(stderr, "Could not generate QR-Code.\n");
 			return EXIT_FAILURE;
 		}
