@@ -23,7 +23,7 @@
  * image size raises with higher levels */
 #define QRCODE_LEVEL	QR_ECLEVEL_L
 
-GdkPixbuf * encode_qrcode (char *text) {
+GdkPixbuf * encode_qrcode (char *text, int scale) {
        QRcode *qrcode;
        GdkPixbuf *pixbuf, *pixbuf_scaled;
        int i, j, k, rowstride, channels;
@@ -52,8 +52,8 @@ GdkPixbuf * encode_qrcode (char *text) {
                }
 
        pixbuf_scaled = gdk_pixbuf_scale_simple (pixbuf,
-		       (qrcode->width + 2) * QRCODE_SCALE,
-		       (qrcode->width + 2) * QRCODE_SCALE,
+		       (qrcode->width + 2) * scale,
+		       (qrcode->width + 2) * scale,
 		       GDK_INTERP_NEAREST);
 
        QRcode_free(qrcode);
@@ -105,8 +105,8 @@ int main(int argc, char **argv) {
 	g_type_init();
 #endif
 	
-	if ((pixbuf = encode_qrcode(http_referer)) == NULL) {
-		if ((pixbuf = encode_qrcode(server_name)) == NULL) {
+	if ((pixbuf = encode_qrcode(http_referer, QRCODE_SCALE)) == NULL) {
+		if ((pixbuf = encode_qrcode(server_name, QRCODE_SCALE)) == NULL) {
 			fprintf(stderr, "Could not generate QR-Code.\n");
 			return EXIT_FAILURE;
 		}
