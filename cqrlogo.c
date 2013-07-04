@@ -27,10 +27,10 @@ GdkPixbuf * encode_qrcode (char *text, int scale) {
        QRcode *qrcode;
        GdkPixbuf *pixbuf, *pixbuf_scaled;
        int i, j, k, rowstride, channels;
-       gchar *pixel;
+       guchar *pixel;
        unsigned char *data;
        
-       qrcode = QRcode_encodeData(strlen(text), text, 0, QRCODE_LEVEL);
+       qrcode = QRcode_encodeData(strlen(text), (unsigned char *)text, 0, QRCODE_LEVEL);
 
        if (qrcode == NULL)
                return NULL;
