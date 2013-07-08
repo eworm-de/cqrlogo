@@ -1,6 +1,8 @@
 # cqrlogo - CGI QR-Code logo for web services
 
 CC	:= gcc
+INSTALL	:= install
+RM	:= rm
 CFLAGS	+= -O2 -Wall -Werror
 CFLAGS	+= $(shell pkg-config --cflags --libs gdk-pixbuf-2.0) \
 	   $(shell pkg-config --cflags --libs libqrencode)
@@ -8,5 +10,8 @@ CFLAGS	+= $(shell pkg-config --cflags --libs gdk-pixbuf-2.0) \
 all: cqrlogo.c
 	$(CC) $(CFLAGS) -o cqrlogo cqrlogo.c
 
+install:
+	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)/usr/share/webapps/cqrlogo/cqrlogo
+
 clean:
-	/bin/rm -f *.o *~ cqrlogo
+	$(RM) -f *.o *~ cqrlogo
