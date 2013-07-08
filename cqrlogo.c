@@ -65,9 +65,9 @@ GdkPixbuf * encode_qrcode (char *text, int scale) {
 int main(int argc, char **argv) {
 	char * http_referer, * server_name, * pattern;
 	regex_t preg;
-	size_t nmatch = 1;
 	regmatch_t pmatch[1];
-	int rc = 0;
+	int rc = 0, referer = 0;
+	size_t bytes = 0;
 
 	GdkPixbuf *pixbuf;
 	int scale = 0;
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "regcomp() failed, returning nonzero (%d)\n", rc);
 
 		/* check if the QR-Code is for the correct server */
-		if ((rc = regexec(&preg, http_referer, nmatch, pmatch, 0)) != 0) {
+		if ((referer = regexec(&preg, http_referer, 1, pmatch, 0)) != 0) {
 			http_referer = malloc(44 + strlen(server_name));
 			sprintf(http_referer, "This QR Code has been stolen from %s!", server_name);
 		}
@@ -128,9 +128,9 @@ int main(int argc, char **argv) {
 
 	/* cut http_referer, text in png file may have a max length of 79 chars */
 	if (strlen(http_referer) > 79) {
-		if (!rc) {
+		if (!referer) {
 			http_referer = strdup(http_referer);
-			rc = 1;
+			referer++;
 		}
 		sprintf(http_referer + 76, "...");
 	}
@@ -140,9 +140,10 @@ int main(int argc, char **argv) {
 			"compression", "9",
 			"tEXt::comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo",
 			"tEXt::referer", http_referer, NULL);
-	fwrite (buffer, 1, size, stdout);
+	if ((bytes = fwrite (buffer, 1, size, stdout)) != size)
+		fprintf(stderr, "fwrite() failed, wrote %zu of %zu bytes.\n", bytes, (size_t)size);
 
-	if (rc)
+	if (referer)
 		free(http_referer);
 	g_object_unref(pixbuf);
 
