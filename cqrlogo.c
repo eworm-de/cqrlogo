@@ -12,6 +12,7 @@
 #include <regex.h>
 
 #include <png.h>
+#include <zlib.h>
 #include <qrencode.h>
 
 #include "config.h"
@@ -41,6 +42,8 @@ int generate_png (struct bitmap_t *bitmap, char *http_referer) {
     
 	png_set_IHDR (png_ptr, info_ptr, bitmap->width, bitmap->height, depth,
 		PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
 #ifdef PNG_TEXT_SUPPORTED
 	png_text text[3];
