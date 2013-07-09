@@ -6,6 +6,7 @@ CP	:= cp
 RM	:= rm
 CFLAGS	+= -O2 -Wall -Werror
 CFLAGS	+= $(shell pkg-config --cflags --libs libpng) \
+	   $(shell pkg-config --cflags --libs zlib) \
 	   $(shell pkg-config --cflags --libs libqrencode)
 VERSION	= $(shell git describe --tags --long)
 

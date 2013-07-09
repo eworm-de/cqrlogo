@@ -47,6 +47,11 @@ int generate_png (struct bitmap_t *bitmap, char *http_referer) {
 
 #ifdef PNG_TEXT_SUPPORTED
 	png_text text[3];
+	char *version;
+	const char *v_libpng = png_libpng_ver, *v_zlib = zlib_version;
+	
+	version = malloc(18 + strlen(VERSION) + strlen(v_libpng) + strlen(v_zlib));
+	sprintf(version, VERSION " (libpng %s, zlib %s)", png_libpng_ver, zlib_version);
 
 	text[0].compression = PNG_TEXT_COMPRESSION_zTXt;
 	text[0].key = "comment";
@@ -54,13 +59,14 @@ int generate_png (struct bitmap_t *bitmap, char *http_referer) {
 
 	text[1].compression = PNG_TEXT_COMPRESSION_zTXt;
 	text[1].key = "version";
-	text[1].text = VERSION;
+	text[1].text = version;
 
 	text[2].compression = PNG_TEXT_COMPRESSION_zTXt;
 	text[2].key = "referer";
 	text[2].text = http_referer;
 
 	png_set_text(png_ptr, info_ptr, text, 3);
+	free(version);
 #endif
 
 	row_pointers = png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
