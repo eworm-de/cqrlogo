@@ -15,6 +15,11 @@
 
 /* pixels are scaled up by this factor */
 #define QRCODE_SCALE	2
+
+/* width of the border
+ * this is defined to at least 4, but works well with less */
+# define QRCODE_BORDER	1
+
 /* error correction level used for QR code
  * possible values: QR_ECLEVEL_L (lowest, about 7% error can be corrected)
  *                  QR_ECLEVEL_M (about 15%)
@@ -23,7 +28,7 @@
  * image size raises with higher levels */
 #define QRCODE_LEVEL	QR_ECLEVEL_L
 
-GdkPixbuf * encode_qrcode (char *text, int scale) {
+GdkPixbuf * encode_qrcode (char *text, int scale, int border) {
        QRcode *qrcode;
        GdkPixbuf *pixbuf, *pixbuf_scaled;
        int i, j, k, rowstride, channels;
@@ -37,23 +42,24 @@ GdkPixbuf * encode_qrcode (char *text, int scale) {
 
        data = qrcode->data;
 
-       pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, qrcode->width + 2, qrcode->width + 2);
+       pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8,
+		       qrcode->width + border * 2, qrcode->width + border * 2);
 
        pixel = gdk_pixbuf_get_pixels (pixbuf);
        rowstride = gdk_pixbuf_get_rowstride (pixbuf);
        channels = gdk_pixbuf_get_n_channels (pixbuf);
 
        gdk_pixbuf_fill(pixbuf, 0xffffffff);
-       for (i = 1; i <= qrcode->width; i++)
-               for (j = 1; j <= qrcode->width; j++) {
+       for (i = border; i < qrcode->width + border; i++)
+               for (j = border; j < qrcode->width + border; j++) {
                        for (k = 0; k < channels; k++)
                                pixel[i * rowstride + j * channels + k] = !(*data & 0x1) * 0xff;
                        data++;
                }
 
        pixbuf_scaled = gdk_pixbuf_scale_simple (pixbuf,
-		       (qrcode->width + 2) * scale,
-		       (qrcode->width + 2) * scale,
+		       (qrcode->width + border * 2) * scale,
+		       (qrcode->width + border * 2) * scale,
 		       GDK_INTERP_NEAREST);
 
        QRcode_free(qrcode);
@@ -70,7 +76,8 @@ int main(int argc, char **argv) {
 	size_t bytes = 0;
 
 	GdkPixbuf *pixbuf;
-	int scale = 0;
+	char *match = NULL;
+	int scale = QRCODE_SCALE, border = QRCODE_BORDER;
 
 	gchar *buffer;
 	gsize size;
@@ -104,20 +111,23 @@ int main(int argc, char **argv) {
 		free(pattern);
 	}
 
-	/* do we have a special scale? */
-	if (query_string)
-		sscanf(query_string, "scale=%u", &scale);
+	if (query_string ) {
+		/* do we have a special scale? */
+		if ((match = strstr(query_string, "scale=")) != NULL)
+			sscanf(match, "scale=%u", &scale);
 
-	if (!scale)
-		scale = QRCODE_SCALE;
+		/* width of the border? */
+		if ((match = strstr(query_string, "border=")) != NULL)
+			sscanf(match, "border=%u", &border);
+	}
 
 	/* initialize type system for glib < 2.36 */
 #ifndef GLIB_VERSION_2_36
 	g_type_init();
 #endif
 	
-	if ((pixbuf = encode_qrcode(http_referer, scale)) == NULL) {
-		if ((pixbuf = encode_qrcode(server_name, scale)) == NULL) {
+	if ((pixbuf = encode_qrcode(http_referer, scale, border)) == NULL) {
+		if ((pixbuf = encode_qrcode(server_name, scale, border)) == NULL) {
 			fprintf(stderr, "Could not generate QR-Code.\n");
 			return EXIT_FAILURE;
 		}
