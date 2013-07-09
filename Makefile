@@ -5,11 +5,13 @@ INSTALL	:= install
 CP	:= cp
 RM	:= rm
 CFLAGS	+= -O2 -Wall -Werror
-CFLAGS	+= $(shell pkg-config --cflags --libs gdk-pixbuf-2.0) \
+CFLAGS	+= $(shell pkg-config --cflags --libs libpng) \
 	   $(shell pkg-config --cflags --libs libqrencode)
+VERSION	= $(shell git describe --tags --long)
 
 all: cqrlogo.c config.h
-	$(CC) $(CFLAGS) -o cqrlogo cqrlogo.c
+	$(CC) $(CFLAGS) -o cqrlogo cqrlogo.c \
+		-DVERSION="\"$(VERSION)\""
 
 config.h:
 	$(CP) config.def.h config.h
