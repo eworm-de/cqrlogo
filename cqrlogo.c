@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
 	struct bitmap_t * bitmap;
 	char *match = NULL;
-	int scale = QRCODE_SCALE, border = QRCODE_BORDER;
+	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER;
 
 	/* get query string for later use */
 	char * query_string = getenv("QUERY_STRING");
@@ -204,11 +204,15 @@ int main(int argc, char **argv) {
 	if (query_string ) {
 		/* do we have a special scale? */
 		if ((match = strstr(query_string, "scale=")) != NULL)
-			sscanf(match, "scale=%u", &scale);
+			if ((sscanf(match, "scale=%u", &scale)) > 0)
+				if (scale < 1 || scale > QRCODE_MAX_SCALE)
+					scale = QRCODE_SCALE;
 
 		/* width of the border? */
 		if ((match = strstr(query_string, "border=")) != NULL)
-			sscanf(match, "border=%u", &border);
+			if ((sscanf(match, "border=%u", &border)) > 0)
+				if (border > QRCODE_MAX_BORDER)
+					border = QRCODE_BORDER;
 	}
 
 	if ((bitmap = encode_qrcode(http_referer, scale, border)) == NULL) {
