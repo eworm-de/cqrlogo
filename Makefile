@@ -24,6 +24,7 @@ install:
 	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)/usr/share/webapps/cqrlogo/cqrlogo
 
 check:
+	$(RM) -f check.png
 	SERVER_NAME=www.eworm.de HTTP_REFERER=http://www.eworm.de/ \
 		QUERY_STRING='scale=2&border=1' ./cqrlogo | $(SED) '1,2d' > \
 		check.png && $(ZBARIMG) --raw -q check.png | $(GREP) -e \
