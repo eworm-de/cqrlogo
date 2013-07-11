@@ -163,6 +163,30 @@ struct bitmap_t * encode_qrcode (char *text, unsigned int scale, unsigned int bo
        return scaled;
 }
 
+/*** get_value ***/
+int get_value(const char *query_string, const char *pattern, unsigned int *value, unsigned int def, unsigned int min, unsigned int max) {
+	char *match = NULL, *newpattern = NULL;
+
+	newpattern = strdup(pattern);
+
+	newpattern = realloc(newpattern, strlen(newpattern) + 2);
+	sprintf(newpattern + strlen(newpattern), "=");
+
+	if ((match = strstr(query_string, newpattern)) != NULL) {
+		newpattern = realloc(newpattern, strlen(newpattern) + 3);
+		sprintf(newpattern + strlen(newpattern), "%%u");
+
+		if ((sscanf(match, newpattern, value)) > 0)
+			if (*value < min || *value > max)
+				*value = def;
+	}
+
+	free(newpattern);
+
+	return EXIT_SUCCESS;
+}
+
+/*** main ***/
 int main(int argc, char **argv) {
 	char * http_referer, * server_name, * pattern;
 	regex_t preg;
@@ -170,7 +194,6 @@ int main(int argc, char **argv) {
 	int referer = 0;
 
 	struct bitmap_t * bitmap;
-	char *match = NULL;
 	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER, level = QRCODE_LEVEL;
 
 	/* get query string for later use */
@@ -206,22 +229,13 @@ int main(int argc, char **argv) {
 
 	if (query_string ) {
 		/* do we have a special scale? */
-		if ((match = strstr(query_string, "scale=")) != NULL)
-			if ((sscanf(match, "scale=%u", &scale)) > 0)
-				if (scale < 1 || scale > QRCODE_MAX_SCALE)
-					scale = QRCODE_SCALE;
+		get_value(query_string, "scale", &scale, QRCODE_SCALE, 1, QRCODE_MAX_SCALE);
 
 		/* width of the border? */
-		if ((match = strstr(query_string, "border=")) != NULL)
-			if ((sscanf(match, "border=%u", &border)) > 0)
-				if (border > QRCODE_MAX_BORDER)
-					border = QRCODE_BORDER;
+		get_value(query_string, "border", &border, QRCODE_BORDER, 0, QRCODE_MAX_BORDER);
 
 		/* error correction level? */
-		if ((match = strstr(query_string, "level=")) != NULL)
-			if ((sscanf(match, "level=%u", &level)) > 0)
-				if (level > QR_ECLEVEL_H)
-					level = QRCODE_LEVEL;
+		get_value(query_string, "level", &level, QRCODE_LEVEL, 0, QR_ECLEVEL_H);
 	}
 
 	if ((bitmap = encode_qrcode(http_referer, scale, border, level)) == NULL) {
