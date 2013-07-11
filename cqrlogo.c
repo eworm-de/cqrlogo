@@ -117,13 +117,13 @@ void bitmap_free(struct bitmap_t * bitmap) {
 }
 
 /*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (char *text, int scale, int border) {
+struct bitmap_t * encode_qrcode (char *text, unsigned int scale, unsigned int border, unsigned int level) {
        QRcode *qrcode;
        struct bitmap_t *bitmap, *scaled;
        int i, j, k, l;
        unsigned char *data;
        
-       qrcode = QRcode_encodeData(strlen(text), (unsigned char *)text, 0, QRCODE_LEVEL);
+       qrcode = QRcode_encodeData(strlen(text), (unsigned char *)text, 0, level);
 
        if (qrcode == NULL)
                return NULL;
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
 	struct bitmap_t * bitmap;
 	char *match = NULL;
-	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER;
+	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER, level = QRCODE_LEVEL;
 
 	/* get query string for later use */
 	char * query_string = getenv("QUERY_STRING");
@@ -213,10 +213,16 @@ int main(int argc, char **argv) {
 			if ((sscanf(match, "border=%u", &border)) > 0)
 				if (border > QRCODE_MAX_BORDER)
 					border = QRCODE_BORDER;
+
+		/* error correction level? */
+		if ((match = strstr(query_string, "level=")) != NULL)
+			if ((sscanf(match, "level=%u", &level)) > 0)
+				if (level > QR_ECLEVEL_H)
+					level = QRCODE_LEVEL;
 	}
 
-	if ((bitmap = encode_qrcode(http_referer, scale, border)) == NULL) {
-		if ((bitmap = encode_qrcode(server_name, scale, border)) == NULL) {
+	if ((bitmap = encode_qrcode(http_referer, scale, border, level)) == NULL) {
+		if ((bitmap = encode_qrcode(server_name, scale, border, level)) == NULL) {
 			fprintf(stderr, "Could not generate QR-Code.\n");
 			return EXIT_FAILURE;
 		}
