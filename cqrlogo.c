@@ -126,7 +126,7 @@ struct bitmap_t * encode_qrcode (char *text, unsigned int scale, unsigned int bo
        int i, j, k, l;
        unsigned char *data;
        
-       qrcode = QRcode_encodeData(strlen(text), (unsigned char *)text, 0, level);
+       qrcode = QRcode_encodeString8bit(text, 0, level);
 
        if (qrcode == NULL)
                return NULL;
