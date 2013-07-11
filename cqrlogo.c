@@ -49,7 +49,7 @@ int generate_png (struct bitmap_t *bitmap, char *http_referer) {
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
 #ifdef PNG_TEXT_SUPPORTED
-#define VERSIONSTR	VERSION " (libpng %s, zlib %s)"
+#define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ", libpng %s, zlib %s)"
 	png_text text[3];
 	char *version;
 	
