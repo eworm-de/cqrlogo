@@ -17,6 +17,9 @@
 
 #include "config.h"
 
+#define URLPATTERN "^[hH][tT][tT][pP][sS]\\?://%s/"
+#define TEXTSTOLEN "This QR Code has been stolen from %s!"
+
 /* a bitmap */
 struct bitmap_t {
 	int width;
@@ -46,12 +49,12 @@ int generate_png (struct bitmap_t *bitmap, char *http_referer) {
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
 #ifdef PNG_TEXT_SUPPORTED
+#define VERSIONSTR	VERSION " (libpng %s, zlib %s)"
 	png_text text[3];
 	char *version;
-	const char *v_libpng = png_libpng_ver, *v_zlib = zlib_version;
 	
-	version = malloc(18 + strlen(VERSION) + strlen(v_libpng) + strlen(v_zlib));
-	sprintf(version, VERSION " (libpng %s, zlib %s)", png_libpng_ver, zlib_version);
+	version = malloc(sizeof(VERSIONSTR) + strlen(png_libpng_ver) + strlen(zlib_version));
+	sprintf(version, VERSIONSTR, png_libpng_ver, zlib_version);
 
 	text[0].compression = PNG_TEXT_COMPRESSION_zTXt;
 	text[0].key = "comment";
@@ -184,8 +187,8 @@ int main(int argc, char **argv) {
 		http_referer = server_name;
 	} else {	
 		/* prepare pattern matching */
-		pattern = malloc(28 + strlen(server_name));
-		sprintf(pattern, "^[hH][tT][tT][pP][sS]\\?://%s/", server_name);
+		pattern = malloc(sizeof(URLPATTERN) + strlen(server_name));
+		sprintf(pattern, URLPATTERN, server_name);
 		if (regcomp(&preg, pattern, 0) != 0) {
 			fprintf(stderr, "regcomp() failed, returning nonzero\n");
 			return EXIT_FAILURE;
@@ -193,8 +196,8 @@ int main(int argc, char **argv) {
 
 		/* check if the QR-Code is for the correct server */
 		if ((referer = regexec(&preg, http_referer, 1, pmatch, 0)) != 0) {
-			http_referer = malloc(44 + strlen(server_name));
-			sprintf(http_referer, "This QR Code has been stolen from %s!", server_name);
+			http_referer = malloc(sizeof(TEXTSTOLEN) + strlen(server_name));
+			sprintf(http_referer, TEXTSTOLEN, server_name);
 		}
 
 		regfree(&preg);
