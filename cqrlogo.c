@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
 		free(stolen);
 	if (uri_png)
 		free(uri_png);
-	free(bitmap);
+	bitmap_free(bitmap);
 
 	return EXIT_SUCCESS;
 }
