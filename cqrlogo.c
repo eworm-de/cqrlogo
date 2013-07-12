@@ -128,6 +128,9 @@ struct bitmap_t * encode_qrcode (char *text, unsigned int scale, unsigned int bo
        
        qrcode = QRcode_encodeString8bit(text, 0, level);
 
+       /* this happens if the string is too long
+	* possibly we have an URL (referer) that is too long, so the code
+	* automatically falls back to http_server (see main()) */
        if (qrcode == NULL)
                return NULL;
 
