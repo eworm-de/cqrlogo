@@ -33,16 +33,16 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_infop info_ptr = NULL;
 	png_byte ** row_pointers = NULL;
 	int x, y, depth = 8;
-    
+
 	if ((png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)) == NULL)
 		return 1;
-    
+
 	if ((info_ptr = png_create_info_struct (png_ptr)) == NULL ||
 			(setjmp (png_jmpbuf (png_ptr)))) {
 		png_destroy_write_struct (&png_ptr, &info_ptr);
 		return 1;
 	}
-    
+
 	png_set_IHDR (png_ptr, info_ptr, bitmap->width, bitmap->height, depth,
 		PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
@@ -80,7 +80,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 			*row++ = bitmap->pixel[y * bitmap->width + x];
 		}
 	}
-    
+
 	png_init_io (png_ptr, stdout);
 	png_set_rows (png_ptr, info_ptr, row_pointers);
 	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
@@ -89,7 +89,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 		png_free (png_ptr, row_pointers[y]);
 	}
 	png_free (png_ptr, row_pointers);
-    
+
 	return 0;
 }
 
@@ -121,38 +121,38 @@ void bitmap_free(struct bitmap_t * bitmap) {
 
 /*** encode_qrcode ***/
 struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned int border, unsigned int level) {
-       QRcode *qrcode;
-       struct bitmap_t *bitmap, *scaled;
-       int i, j, k, l;
-       unsigned char *data;
-       
-       qrcode = QRcode_encodeString8bit(text, 0, level);
+	QRcode *qrcode;
+	struct bitmap_t *bitmap, *scaled;
+	int i, j, k, l;
+	unsigned char *data;
 
-       /* this happens if the string is too long
-	* possibly we have an URL (referer) that is too long, so the code
-	* automatically falls back to http_server (see main()) */
-       if (qrcode == NULL)
-               return NULL;
+	qrcode = QRcode_encodeString8bit(text, 0, level);
 
-       data = qrcode->data;
+	/* this happens if the string is too long
+	 * possibly we have an URL (referer) that is too long, so the code
+	 * automatically falls back to http_server (see main()) */
+	if (qrcode == NULL)
+		return NULL;
 
-       /* wirte QR code to bitmap */
-       if ((bitmap = bitmap_new(qrcode->width + border * 2, qrcode->width + border * 2)) == NULL)
-	       return NULL;
-       for (i = border; i < qrcode->width + border; i++)
-               for (j = border; j < qrcode->width + border; j++) {
-                       bitmap->pixel[i * (qrcode->width + border * 2) + j] = !(*data & 0x1) * 0xff;
-                       data++;
-               }
+	data = qrcode->data;
 
-       QRcode_free(qrcode);
+	/* wirte QR code to bitmap */
+	if ((bitmap = bitmap_new(qrcode->width + border * 2, qrcode->width + border * 2)) == NULL)
+		return NULL;
+	for (i = border; i < qrcode->width + border; i++)
+		for (j = border; j < qrcode->width + border; j++) {
+			bitmap->pixel[i * (qrcode->width + border * 2) + j] = !(*data & 0x1) * 0xff;
+			data++;
+		}
 
-       if (scale == 1)
-	       return bitmap;
+	QRcode_free(qrcode);
 
-       /* scale bitmap */
-       if ((scaled = bitmap_new(bitmap->width * scale, bitmap->height * scale)) == NULL)
-	       return NULL;
+	if (scale == 1)
+		return bitmap;
+
+	/* scale bitmap */
+	if ((scaled = bitmap_new(bitmap->width * scale, bitmap->height * scale)) == NULL)
+		return NULL;
 	for (i = 0; i < bitmap->height; i++)
 		for (j = 0; j < bitmap->width; j++)
 			for (k = 0; k < scale; k++)
@@ -161,9 +161,9 @@ struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned 
 						bitmap->pixel[i * bitmap->width + j];
 
 
-       bitmap_free(bitmap);
-       
-       return scaled;
+	bitmap_free(bitmap);
+
+	return scaled;
 }
 
 /*** get_value ***/
