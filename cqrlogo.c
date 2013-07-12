@@ -18,7 +18,7 @@
 #include "config.h"
 
 #define URLPATTERN "^[hH][tT][tT][pP][sS]\\?://%s/"
-#define TEXTSTOLEN "This QR Code has been stolen from %s!"
+#define TEXTSTOLEN "This QR Code has been stolen from http%s://%s/!"
 
 /* a bitmap */
 struct bitmap_t {
@@ -28,7 +28,7 @@ struct bitmap_t {
 };
 
 /*** generate_png ***/
-int generate_png (struct bitmap_t *bitmap, char *http_referer) {
+int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_structp png_ptr = NULL;
 	png_infop info_ptr = NULL;
 	png_byte ** row_pointers = NULL;
@@ -66,7 +66,7 @@ int generate_png (struct bitmap_t *bitmap, char *http_referer) {
 
 	text[2].compression = PNG_TEXT_COMPRESSION_zTXt;
 	text[2].key = "referer";
-	text[2].text = http_referer;
+	text[2].text = (char*)uri;
 
 	png_set_text(png_ptr, info_ptr, text, 3);
 	free(version);
@@ -120,7 +120,7 @@ void bitmap_free(struct bitmap_t * bitmap) {
 }
 
 /*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (char *text, unsigned int scale, unsigned int border, unsigned int level) {
+struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned int border, unsigned int level) {
        QRcode *qrcode;
        struct bitmap_t *bitmap, *scaled;
        int i, j, k, l;
@@ -191,16 +191,14 @@ int get_value(const char *query_string, const char *pattern, unsigned int *value
 
 /*** main ***/
 int main(int argc, char **argv) {
-	char * http_referer, * server_name, * pattern;
+	const char * http_referer, * server_name, * query_string, * uri;
+	char * uri_server_name = NULL, * uri_png = NULL, * pattern = NULL, * stolen = NULL;
 	regex_t preg;
 	regmatch_t pmatch[1];
-	int referer = 0;
+	unsigned int https = 0;
 
 	struct bitmap_t * bitmap;
 	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER, level = QRCODE_LEVEL;
-
-	/* get query string for later use */
-	char * query_string = getenv("QUERY_STRING");
 
 	/* check if we have environment variables from CGI */
 	if ((server_name = getenv("SERVER_NAME")) == NULL) {
@@ -209,28 +207,17 @@ int main(int argc, char **argv) {
 				"to send referer information.\n");
 		return EXIT_FAILURE;
 	} 
-	if ((http_referer = getenv("HTTP_REFERER")) == NULL) {
-		http_referer = server_name;
-	} else {	
-		/* prepare pattern matching */
-		pattern = malloc(sizeof(URLPATTERN) + strlen(server_name));
-		sprintf(pattern, URLPATTERN, server_name);
-		if (regcomp(&preg, pattern, 0) != 0) {
-			fprintf(stderr, "regcomp() failed, returning nonzero\n");
-			return EXIT_FAILURE;
-		}
 
-		/* check if the QR-Code is for the correct server */
-		if ((referer = regexec(&preg, http_referer, 1, pmatch, 0)) != 0) {
-			http_referer = malloc(sizeof(TEXTSTOLEN) + strlen(server_name));
-			sprintf(http_referer, TEXTSTOLEN, server_name);
-		}
+	/* check if we have https connection */
+	if (getenv("HTTPS") != NULL)
+		https = 1;
 
-		regfree(&preg);
-		free(pattern);
-	}
+	/* assemble uri for use when referer is missing or fails */
+	uri_server_name = malloc(10 + strlen(server_name));
+	sprintf(uri_server_name, "http%s://%s/", https ? "s" : "", server_name);
 
-	if (query_string ) {
+	/* get query string and read settings */
+	if ((query_string = getenv("QUERY_STRING")) != NULL) {
 		/* do we have a special scale? */
 		get_value(query_string, "scale", &scale, QRCODE_SCALE, 1, QRCODE_MAX_SCALE);
 
@@ -241,8 +228,37 @@ int main(int argc, char **argv) {
 		get_value(query_string, "level", &level, QRCODE_LEVEL, 0, QR_ECLEVEL_H);
 	}
 
-	if ((bitmap = encode_qrcode(http_referer, scale, border, level)) == NULL) {
-		if ((bitmap = encode_qrcode(server_name, scale, border, level)) == NULL) {
+	/* get http referer */
+	if ((http_referer = getenv("HTTP_REFERER")) != NULL) {
+		uri = http_referer;
+
+		/* prepare pattern matching */
+		pattern = malloc(sizeof(URLPATTERN) + strlen(server_name));
+		sprintf(pattern, URLPATTERN, server_name);
+		if (regcomp(&preg, pattern, 0) != 0) {
+			fprintf(stderr, "regcomp() failed, returning nonzero\n");
+			return EXIT_FAILURE;
+		}
+
+		/* check if the QR-Code is for the correct server */
+		if (regexec(&preg, http_referer, 1, pmatch, 0) != 0) {
+			stolen = malloc(sizeof(TEXTSTOLEN) + strlen(server_name));
+			sprintf(stolen, TEXTSTOLEN, https ? "s" : "", server_name);
+			uri = stolen;
+		}
+
+		regfree(&preg);
+		free(pattern);
+	} else {
+		/* use uri assembled from server name */
+		uri = uri_server_name;
+	}
+
+	/* encode the QR-Code */
+	if ((bitmap = encode_qrcode(uri, scale, border, level)) == NULL) {
+		/* uri too long? retry with uri from server name */
+		uri = uri_server_name;
+		if ((bitmap = encode_qrcode(uri, scale, border, level)) == NULL) {
 			fprintf(stderr, "Could not generate QR-Code.\n");
 			return EXIT_FAILURE;
 		}
@@ -251,23 +267,27 @@ int main(int argc, char **argv) {
 	/* print HTTP header */
 	printf("Content-Type: image/png\n\n");
 
-	/* cut http_referer, text in png file may have a max length of 79 chars */
-	if (strlen(http_referer) > 79) {
-		if (!referer) {
-			http_referer = strdup(http_referer);
-			referer++;
-		}
-		sprintf(http_referer + 76, "...");
+	/* cut uri, text in png file may have a max length of 79 chars */
+	if (strlen(uri) > 79) {
+		uri_png = strdup(uri);
+		sprintf(uri_png + 76, "...");
+		uri = uri_png;
 	}
 
 	/* print PNG data */
-	if (generate_png(bitmap, http_referer)) {
+	if (generate_png(bitmap, uri)) {
 		fprintf(stderr, "Failed to generate PNG.\n");
 		return EXIT_FAILURE;
 	}
 
-	if (referer)
-		free(http_referer);
+
+	/* free memory we no longer need */
+	if (uri_server_name)
+		free(uri_server_name);
+	if (stolen)
+		free(stolen);
+	if (uri_png)
+		free(uri_png);
 	free(bitmap);
 
 	return EXIT_SUCCESS;

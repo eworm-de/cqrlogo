@@ -33,6 +33,11 @@ check:
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
+	SERVER_NAME=$(SERVER) HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
+		    ./cqrlogo | $(SED) '1,2d' > check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^https://$(SERVER)/$$'
+
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=0' \
 		./cqrlogo | $(SED) '1,2d' > \
@@ -101,7 +106,14 @@ check:
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | \
-		$(GREP) -e '^This QR Code has been stolen from eworm.net!$$'
+		$(GREP) -e '^This QR Code has been stolen from http://eworm.net/!$$'
+
+	SERVER_NAME=eworm.net HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
+		./cqrlogo | $(SED) '1,2d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | \
+		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
 	$(RM) -f *.o *~ cqrlogo
