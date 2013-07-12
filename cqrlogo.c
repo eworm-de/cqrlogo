@@ -92,9 +92,8 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_set_rows (png_ptr, info_ptr, row_pointers);
 	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 
-	for (y = 0; y < bitmap->height; y++) {
+	for (y = 0; y < bitmap->height; ++y)
 		png_free (png_ptr, row_pointers[y]);
-	}
 	png_free (png_ptr, row_pointers);
 
 	return 0;
