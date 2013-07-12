@@ -22,8 +22,8 @@
 
 /* a bitmap */
 struct bitmap_t {
-	int width;
-	int height;
+	unsigned int width;
+	unsigned int height;
 	uint8_t *pixel;
 };
 
@@ -32,7 +32,8 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_structp png_ptr = NULL;
 	png_infop info_ptr = NULL;
 	png_byte ** row_pointers = NULL;
-	int x, y, depth = 8;
+	unsigned int x, y;
+	uint8_t bit, byte;
 
 	if ((png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)) == NULL)
 		return 1;
@@ -43,7 +44,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 		return 1;
 	}
 
-	png_set_IHDR (png_ptr, info_ptr, bitmap->width, bitmap->height, depth,
+	png_set_IHDR (png_ptr, info_ptr, bitmap->width, bitmap->height, 1 /* depth */,
 		PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
@@ -74,10 +75,16 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 
 	row_pointers = png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
 	for (y = 0; y < bitmap->height; ++y) {
-		png_byte *row = png_malloc (png_ptr, sizeof (uint8_t) * bitmap->width);
-		row_pointers[y] = row;
+		/* we need to round up, need a complete byte for less than eight bits */
+		row_pointers[y] = png_malloc (png_ptr, (sizeof(uint8_t) * bitmap->width + 7) / 8);
 		for (x = 0; x < bitmap->width; ++x) {
-			*row++ = bitmap->pixel[y * bitmap->width + x];
+			/* bit are written in reverse order! */
+			bit = 7 - (x % 8);
+			byte = x / 8;
+			if (bitmap->pixel[y * bitmap->width + x])
+				row_pointers[y][byte] |= 1 << (bit);
+			else
+				row_pointers[y][byte] &= ~(1 << (bit));
 		}
 	}
 
