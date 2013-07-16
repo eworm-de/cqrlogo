@@ -17,14 +17,14 @@ VERSION	= $(shell git describe --tags --long)
 
 all: cqrlogo README.html cqrlogo.png
 
-cqrlogo: config.h
+cqrlogo: cqrlogo.c config.h
 	$(CC) $(CFLAGS) -o cqrlogo cqrlogo.c \
 		-DVERSION="\"$(VERSION)\""
 
 config.h:
 	$(CP) config.def.h config.h
 
-README.html:
+README.html: README.md
 	$(MD) README.md > README.html
 
 cqrlogo.png: cqrlogo
@@ -130,4 +130,4 @@ check:
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
-	$(RM) -f *.o *~ *.png cqrlogo
+	$(RM) -f *.o *~ *.png README.html cqrlogo

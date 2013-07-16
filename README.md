@@ -17,6 +17,7 @@ To compile and run `cqrlogo` you need:
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
 * [zlib](http://www.zlib.net/) (which is a dependency for libpng)
 * [qrencode](http://megaui.net/fukuchi/works/qrencode/index.en.html)
+* [markdown](http://daringfireball.net/projects/markdown/) (HTML documentation)
 
 Additionally it is expected to have `make` and `pkg-config` around to
 successfully compile.
@@ -38,7 +39,8 @@ followed by:
 
 > make install
 
-This will place an executable at `/usr/share/webapps/cqrlogo/cqrlogo`.
+This will place an executable at `/usr/share/webapps/cqrlogo/cqrlogo`,
+documentation can be found in `/usr/share/doc/cqrlogo/`.
 
 The file `config.h` (copy from `config.def.h` if it does not exist) provides
 some build time configuration, so feel free to make your changes there and
