@@ -23,6 +23,7 @@ config.h:
 
 install:
 	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)/usr/share/webapps/cqrlogo/cqrlogo
+	$(INSTALL) -D -m0644 README.md $(DESTDIR)/usr/share/doc/cqrlogo/README.md
 
 check:
 	$(eval SERVER := www.eworm.de)
