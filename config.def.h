@@ -17,3 +17,7 @@
  * image size raises with higher levels */
 #define QRCODE_LEVEL	QR_ECLEVEL_L
 
+/* if you really, really, really want to save some bytes...
+ * it is possible to disable text information in PNG file, just uncomment
+ * below to undefine PNG_TEXT_SUPPORTED */
+/* #undef PNG_TEXT_SUPPORTED */
