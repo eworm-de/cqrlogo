@@ -16,6 +16,8 @@
  *                  QR_ECLEVEL_H (highest, about 30%)
  * image size raises with higher levels */
 #define QRCODE_LEVEL	QR_ECLEVEL_L
+/* note that changing the level at runtime requies
+ * a numeric value from 0 to 3 */
 
 /* if you really, really, really want to save some bytes...
  * it is possible to disable text information in PNG file, just uncomment
