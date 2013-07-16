@@ -116,4 +116,4 @@ check:
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
-	$(RM) -f *.o *~ cqrlogo
+	$(RM) -f *.o *~ check.png cqrlogo
