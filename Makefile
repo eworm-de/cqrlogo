@@ -1,6 +1,7 @@
 # cqrlogo - CGI QR-Code logo for web services
 
 CC	:= gcc
+MD	:= markdown
 INSTALL	:= install
 CP	:= cp
 RM	:= rm
@@ -14,16 +15,28 @@ CFLAGS	+= $(shell pkg-config --cflags --libs libpng) \
 	   $(shell pkg-config --cflags --libs libqrencode)
 VERSION	= $(shell git describe --tags --long)
 
-all: cqrlogo.c config.h
+all: cqrlogo README.html cqrlogo.png
+
+cqrlogo: config.h
 	$(CC) $(CFLAGS) -o cqrlogo cqrlogo.c \
 		-DVERSION="\"$(VERSION)\""
 
 config.h:
 	$(CP) config.def.h config.h
 
-install:
+README.html:
+	$(MD) README.md > README.html
+
+cqrlogo.png: cqrlogo
+	SERVER_NAME="github.com" HTTP_REFERER="https://github.com/eworm-de/cqrlogo" \
+		    QUERY_STRING='scale=4' \
+		    ./cqrlogo | $(SED) '1,/^$$/d' > cqrlogo.png
+
+install: cqrlogo README.html cqrlogo.png
 	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)/usr/share/webapps/cqrlogo/cqrlogo
 	$(INSTALL) -D -m0644 README.md $(DESTDIR)/usr/share/doc/cqrlogo/README.md
+	$(INSTALL) -D -m0644 README.html $(DESTDIR)/usr/share/doc/cqrlogo/README.html
+	$(INSTALL) -D -m0644 cqrlogo.png $(DESTDIR)/usr/share/doc/cqrlogo/cqrlogo.png
 
 check:
 	$(eval SERVER := www.eworm.de)
@@ -117,4 +130,4 @@ check:
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
-	$(RM) -f *.o *~ check.png cqrlogo
+	$(RM) -f *.o *~ *.png cqrlogo
