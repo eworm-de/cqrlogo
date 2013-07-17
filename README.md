@@ -9,8 +9,8 @@ The resulting QR-Code should look something like this:
 
 It is generated dynamically from referer URL sent by the user agent.
 
-Requirments
------------
+Requirements
+------------
 
 To compile and run `cqrlogo` you need:
 
