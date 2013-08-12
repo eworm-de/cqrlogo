@@ -20,6 +20,9 @@
  * a numeric value from 0 to 3 */
 
 /* if you really, really, really want to save some bytes...
- * it is possible to disable text information in PNG file, just uncomment
- * below to undefine PNG_TEXT_SUPPORTED */
-/* #undef PNG_TEXT_SUPPORTED */
+ * It is possible to disable text information in PNG file completly, though
+ * nobody will have an idea where you got this great software...
+ * So please do not. */
+#define PNG_ENABLE_TEXT	1
+/* do you want version information within the PNG file? */
+#define PNG_ENABLE_TEXT_VERSIONS 1

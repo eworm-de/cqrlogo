@@ -27,6 +27,20 @@ struct bitmap_t {
 	uint8_t *pixel;
 };
 
+#if defined PNG_TEXT_SUPPORTED && PNG_ENABLE_TEXT
+/*** add_png_text ***/
+png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text) {
+	pngtext = realloc(pngtext, ((*textcount) + 1) * sizeof(png_text));
+	
+	pngtext[*textcount].compression = PNG_TEXT_COMPRESSION_zTXt;
+	pngtext[*textcount].key = key;
+	pngtext[*textcount].text = text;
+	
+	(*textcount)++;
+	return pngtext;
+}
+#endif
+
 /*** generate_png ***/
 int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_structp png_ptr = NULL;
@@ -49,28 +63,30 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
-#ifdef PNG_TEXT_SUPPORTED
-#define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ", libpng %s, zlib %s)"
-	png_text text[3];
-	char *version;
+#if defined PNG_TEXT_SUPPORTED && PNG_ENABLE_TEXT
+	unsigned int textcount = 0;
+	png_text *pngtext = NULL;
+
+	pngtext = add_png_text(pngtext, &textcount, "comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo"); 
+	pngtext = add_png_text(pngtext, &textcount, "referer", (char *)uri);
+
+#	if PNG_ENABLE_TEXT_VERSIONS
+#	define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"
+#	define LIBSSTR		"libqrencode %s, libpng %s, zlib %s"
+	char *libsstr, *qrver = QRcode_APIVersionString();
 	
-	version = malloc(sizeof(VERSIONSTR) + strlen(png_libpng_ver) + strlen(zlib_version));
-	sprintf(version, VERSIONSTR, png_libpng_ver, zlib_version);
+	libsstr = malloc(sizeof(LIBSSTR) + strlen(qrver) + strlen(png_libpng_ver) + strlen(zlib_version));
+	sprintf(libsstr, LIBSSTR, qrver, png_libpng_ver, zlib_version);
 
-	text[0].compression = PNG_TEXT_COMPRESSION_zTXt;
-	text[0].key = "comment";
-	text[0].text = "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo";
+	pngtext = add_png_text(pngtext, &textcount, "version", VERSIONSTR);
+	pngtext = add_png_text(pngtext, &textcount, "libs", libsstr);
+#	endif
 
-	text[1].compression = PNG_TEXT_COMPRESSION_zTXt;
-	text[1].key = "version";
-	text[1].text = version;
-
-	text[2].compression = PNG_TEXT_COMPRESSION_zTXt;
-	text[2].key = "referer";
-	text[2].text = (char*)uri;
-
-	png_set_text(png_ptr, info_ptr, text, 3);
-	free(version);
+	png_set_text(png_ptr, info_ptr, pngtext, textcount);
+	free(pngtext);
+#	if PNG_ENABLE_TEXT_VERSIONS
+	free(libsstr);
+#	endif
 #endif
 
 	row_pointers = png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
