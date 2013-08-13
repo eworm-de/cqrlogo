@@ -68,7 +68,9 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_text *pngtext = NULL;
 
 	pngtext = add_png_text(pngtext, &textcount, "comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo"); 
+#	if PNG_ENABLE_TEXT_REFERER
 	pngtext = add_png_text(pngtext, &textcount, "referer", (char *)uri);
+#	endif
 
 #	if PNG_ENABLE_TEXT_VERSIONS
 #	define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"

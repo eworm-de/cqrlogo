@@ -26,3 +26,5 @@
 #define PNG_ENABLE_TEXT	1
 /* do you want version information within the PNG file? */
 #define PNG_ENABLE_TEXT_VERSIONS 1
+/* add referer information to the PNG file? */
+#define PNG_ENABLE_TEXT_REFERER 1
