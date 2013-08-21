@@ -32,8 +32,12 @@ cqrlogo.png: cqrlogo
 		    QUERY_STRING='scale=4' \
 		    ./cqrlogo | $(SED) '1,/^$$/d' > cqrlogo.png
 
-install: cqrlogo README.html cqrlogo.png
+install: install-bin install-doc
+
+install-bin: cqrlogo
 	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)/usr/share/webapps/cqrlogo/cqrlogo
+
+install-doc: README.html cqrlogo.png
 	$(INSTALL) -D -m0644 README.md $(DESTDIR)/usr/share/doc/cqrlogo/README.md
 	$(INSTALL) -D -m0644 README.html $(DESTDIR)/usr/share/doc/cqrlogo/README.html
 	$(INSTALL) -D -m0644 cqrlogo.png $(DESTDIR)/usr/share/doc/cqrlogo/cqrlogo.png
