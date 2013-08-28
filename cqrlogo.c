@@ -61,7 +61,12 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	png_set_IHDR (png_ptr, info_ptr, bitmap->width, bitmap->height, 1 /* depth */,
 		PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
+	/* use best compression */
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+
+	/* use compression strategy filtered 
+	 * this way pngcrush can not optimize any more */
+	png_set_compression_strategy(png_ptr, Z_FILTERED);
 
 #if defined PNG_TEXT_SUPPORTED && PNG_ENABLE_TEXT
 	unsigned int textcount = 0;
