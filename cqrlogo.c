@@ -212,7 +212,7 @@ int get_value(const char *query_string, const char *pattern, unsigned int *value
 	sprintf(newpattern + length, "=");
 
 	if ((match = strstr(query_string, newpattern)) != NULL) {
-		sprintf(newpattern + length, "%%u");
+		sprintf(newpattern + length + 1, "%%u");
 
 		if ((sscanf(match, newpattern, value)) > 0)
 			if (*value < min || *value > max)
