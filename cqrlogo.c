@@ -90,7 +90,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 #	endif
 
 	png_set_text(png_ptr, info_ptr, pngtext, textcount);
-	free(pngtext);
+	png_free (png_ptr, pngtext);
 #	if PNG_ENABLE_TEXT_VERSIONS
 	free(libsstr);
 #	endif
@@ -118,6 +118,9 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	for (y = 0; y < bitmap->height; ++y)
 		png_free (png_ptr, row_pointers[y]);
 	png_free (png_ptr, row_pointers);
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+
+	fclose(stdout);
 
 	return 0;
 }
@@ -198,15 +201,18 @@ struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned 
 /*** get_value ***/
 int get_value(const char *query_string, const char *pattern, unsigned int *value, unsigned int def, unsigned int min, unsigned int max) {
 	char *match = NULL, *newpattern = NULL;
+	unsigned int length;
 
 	newpattern = strdup(pattern);
 
-	newpattern = realloc(newpattern, strlen(newpattern) + 2);
-	sprintf(newpattern + strlen(newpattern), "=");
+	length = strlen(newpattern);
+	/* length is without null termination, allocacte 4 bytes so we
+	 * have "=", "%u" and null termination */
+	newpattern = realloc(newpattern, length + 4);
+	sprintf(newpattern + length, "=");
 
 	if ((match = strstr(query_string, newpattern)) != NULL) {
-		newpattern = realloc(newpattern, strlen(newpattern) + 3);
-		sprintf(newpattern + strlen(newpattern), "%%u");
+		sprintf(newpattern + length, "%%u");
 
 		if ((sscanf(match, newpattern, value)) > 0)
 			if (*value < min || *value > max)
