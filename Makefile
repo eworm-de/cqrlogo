@@ -13,7 +13,12 @@ CFLAGS	+= -O2 -Wall -Werror
 CFLAGS	+= $(shell pkg-config --cflags --libs libpng) \
 	   $(shell pkg-config --cflags --libs zlib) \
 	   $(shell pkg-config --cflags --libs libqrencode)
-VERSION	= $(shell git describe --tags --long)
+VERSION := $(shell git describe --tags --long 2>/dev/null)
+# this is just a fallback in case you do not use git but downloaded
+# a release tarball...
+ifeq ($(VERSION),)
+VERSION := 0.3.2
+endif
 
 all: cqrlogo README.html cqrlogo.png
 
