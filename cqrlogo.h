@@ -1,0 +1,39 @@
+/*
+ * (C) 2013 by Christian Hesse <mail@eworm.de>
+ *
+ * This software may be used and distributed according to the terms
+ * of the GNU General Public License, incorporated herein by reference.
+ */
+
+#ifndef _CQRLOGO_H
+#define _CQRLOGO_H
+
+/* a bitmap */
+struct bitmap_t {
+	unsigned int width;
+	unsigned int height;
+	uint8_t *pixel;
+};
+
+#if defined PNG_TEXT_SUPPORTED && PNG_ENABLE_TEXT
+/*** add_png_text ***/
+png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text);
+#endif
+
+/*** generate_png ***/
+int generate_png (struct bitmap_t *bitmap, const char *uri);
+
+/*** bitmap_new ***/
+struct bitmap_t * bitmap_new(int width, int height);
+/*** bitmap_free ***/
+void bitmap_free(struct bitmap_t * bitmap);
+
+/*** encode_qrcode ***/
+struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned int border, unsigned int level);
+
+/*** get_value ***/
+int get_value(const char *query_string, const char *pattern, unsigned int *value, unsigned int def, unsigned int min, unsigned int max);
+
+#endif /* _CQRLOGO_H */
+
+// vim: set syntax=c:

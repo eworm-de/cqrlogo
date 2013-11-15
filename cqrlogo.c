@@ -17,15 +17,11 @@
 
 #include "config.h"
 
+/* define structs and functions */
+#include "cqrlogo.h"
+
 #define URLPATTERN "^[hH][tT][tT][pP][sS]\\?://%s/"
 #define TEXTSTOLEN "This QR Code has been stolen from http%s://%s/!"
-
-/* a bitmap */
-struct bitmap_t {
-	unsigned int width;
-	unsigned int height;
-	uint8_t *pixel;
-};
 
 #if defined PNG_TEXT_SUPPORTED && PNG_ENABLE_TEXT
 /*** add_png_text ***/
