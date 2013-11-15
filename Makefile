@@ -140,3 +140,6 @@ check:
 
 clean:
 	$(RM) -f *.o *~ *.png README.html cqrlogo
+
+distclean:
+	$(RM) -f *.o *~ *.png README.html cqrlogo config.h
