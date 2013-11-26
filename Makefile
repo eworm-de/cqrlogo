@@ -1,5 +1,6 @@
 # cqrlogo - CGI QR-Code logo for web services
 
+PREFIX	:= /usr
 CC	:= gcc
 MD	:= markdown
 INSTALL	:= install
@@ -23,7 +24,7 @@ endif
 all: cqrlogo README.html cqrlogo.png
 
 cqrlogo: cqrlogo.c config.h
-	$(CC) $(CFLAGS) -o cqrlogo cqrlogo.c \
+	$(CC) $(CFLAGS) $(LDFLAGS) -o cqrlogo cqrlogo.c \
 		-DVERSION="\"$(VERSION)\""
 
 config.h:
@@ -40,12 +41,12 @@ cqrlogo.png: cqrlogo
 install: install-bin install-doc
 
 install-bin: cqrlogo
-	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)/usr/share/webapps/cqrlogo/cqrlogo
+	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)$(PREFIX)/share/webapps/cqrlogo/cqrlogo
 
 install-doc: README.html cqrlogo.png
-	$(INSTALL) -D -m0644 README.md $(DESTDIR)/usr/share/doc/cqrlogo/README.md
-	$(INSTALL) -D -m0644 README.html $(DESTDIR)/usr/share/doc/cqrlogo/README.html
-	$(INSTALL) -D -m0644 cqrlogo.png $(DESTDIR)/usr/share/doc/cqrlogo/cqrlogo.png
+	$(INSTALL) -D -m0644 README.md $(DESTDIR)$(PREFIX)/share/doc/cqrlogo/README.md
+	$(INSTALL) -D -m0644 README.html $(DESTDIR)$(PREFIX)/share/doc/cqrlogo/README.html
+	$(INSTALL) -D -m0644 cqrlogo.png $(DESTDIR)$(PREFIX)/share/doc/cqrlogo/cqrlogo.png
 
 check:
 	$(eval SERVER := www.eworm.de)
