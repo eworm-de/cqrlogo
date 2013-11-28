@@ -29,10 +29,16 @@ struct bitmap_t * bitmap_new(int width, int height);
 void bitmap_free(struct bitmap_t * bitmap);
 
 /*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned int border, unsigned int level);
+struct bitmap_t * encode_qrcode (const char *text, unsigned int scale,
+		unsigned int border, unsigned int level);
 
-/*** get_value ***/
-int get_value(const char *query_string, const char *pattern, unsigned int *value, unsigned int def, unsigned int min, unsigned int max);
+/*** get_query_value ***/
+unsigned int get_query_value(const char *query_string, const char *pattern,
+		unsigned int value, unsigned int min, unsigned int max);
+
+/*** get_ini_value ***/
+unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,
+		unsigned int value, unsigned int min, unsigned int max);
 
 #endif /* _CQRLOGO_H */
 

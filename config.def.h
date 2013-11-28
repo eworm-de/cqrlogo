@@ -8,6 +8,13 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+/* path to the config file */
+#define CONFIGFILE	"/etc/cqrlogo.conf"
+
+/* whether or not defaults or settings from config may be overwritten
+ * by query string */
+#define ALLOW_OVERWRITE	1
+
 /* pixels are scaled up by this factor */
 #define QRCODE_SCALE		2
 /* this is the maximum scale factor */

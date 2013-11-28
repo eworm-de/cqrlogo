@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <regex.h>
 
+#include <iniparser.h>
 #include <png.h>
 #include <zlib.h>
 #include <qrencode.h>
@@ -27,11 +28,11 @@
 /*** add_png_text ***/
 png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text) {
 	pngtext = realloc(pngtext, ((*textcount) + 1) * sizeof(png_text));
-	
+
 	pngtext[*textcount].compression = PNG_TEXT_COMPRESSION_zTXt;
 	pngtext[*textcount].key = key;
 	pngtext[*textcount].text = text;
-	
+
 	(*textcount)++;
 	return pngtext;
 }
@@ -60,7 +61,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	/* use best compression */
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
-	/* use compression strategy filtered 
+	/* use compression strategy filtered
 	 * this way pngcrush can not optimize any more */
 	png_set_compression_strategy(png_ptr, Z_FILTERED);
 
@@ -68,7 +69,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 	unsigned int textcount = 0;
 	png_text *pngtext = NULL;
 
-	pngtext = add_png_text(pngtext, &textcount, "comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo"); 
+	pngtext = add_png_text(pngtext, &textcount, "comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo");
 #	if PNG_ENABLE_TEXT_REFERER
 	pngtext = add_png_text(pngtext, &textcount, "referer", (char *)uri);
 #	endif
@@ -77,7 +78,7 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 #	define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"
 #	define LIBSSTR		"libqrencode %s, libpng %s, zlib %s"
 	char *libsstr, *qrver = QRcode_APIVersionString();
-	
+
 	libsstr = malloc(sizeof(LIBSSTR) + strlen(qrver) + strlen(png_libpng_ver) + strlen(zlib_version));
 	sprintf(libsstr, LIBSSTR, qrver, png_libpng_ver, zlib_version);
 
@@ -148,7 +149,8 @@ void bitmap_free(struct bitmap_t * bitmap) {
 }
 
 /*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned int border, unsigned int level) {
+struct bitmap_t * encode_qrcode (const char *text, unsigned int scale,
+		unsigned int border, unsigned int level) {
 	QRcode *qrcode;
 	struct bitmap_t *bitmap, *scaled;
 	int i, j, k, l;
@@ -194,10 +196,12 @@ struct bitmap_t * encode_qrcode (const char *text, unsigned int scale, unsigned 
 	return scaled;
 }
 
-/*** get_value ***/
-int get_value(const char *query_string, const char *pattern, unsigned int *value, unsigned int def, unsigned int min, unsigned int max) {
+/*** get_query_value ***/
+unsigned int get_query_value(const char *query_string, const char *pattern,
+		unsigned int value, unsigned int min, unsigned int max) {
 	char *match = NULL, *newpattern = NULL;
 	unsigned int length;
+	int tmp = -1;
 
 	newpattern = strdup(pattern);
 
@@ -210,23 +214,46 @@ int get_value(const char *query_string, const char *pattern, unsigned int *value
 	if ((match = strstr(query_string, newpattern)) != NULL) {
 		sprintf(newpattern + length + 1, "%%u");
 
-		if ((sscanf(match, newpattern, value)) > 0)
-			if (*value < min || *value > max)
-				*value = def;
+		if ((sscanf(match, newpattern, &tmp)) > 0)
+			if (tmp >= min && tmp <= max)
+				value = tmp;
 	}
 
 	free(newpattern);
 
-	return EXIT_SUCCESS;
+	return value;
+}
+
+/*** get_ini_value ***/
+unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,
+		unsigned int value, unsigned int min, unsigned int max) {
+	char * key;
+	unsigned int tmp;
+
+	key = malloc(strlen(section) + strlen(parameter) + 2);
+	sprintf(key, "%s:%s", section, parameter);
+
+	if (type)
+		tmp = iniparser_getint(ini, key, value);
+	else
+		tmp = iniparser_getboolean(ini, key, value);
+
+	if (tmp >= min && tmp <= max)
+		value = tmp;
+
+	free(key);
+
+	return value;
 }
 
 /*** main ***/
 int main(int argc, char **argv) {
+	dictionary * ini;
 	const char * http_referer, * server_name, * query_string, * uri;
 	char * uri_server_name = NULL, * uri_png = NULL, * pattern = NULL, * stolen = NULL;
 	regex_t preg;
 	regmatch_t pmatch[1];
-	unsigned int https = 0;
+	uint8_t https = 0, overwrite = ALLOW_OVERWRITE;
 
 	struct bitmap_t * bitmap;
 	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER, level = QRCODE_LEVEL;
@@ -237,7 +264,7 @@ int main(int argc, char **argv) {
 				"Note that SERVER_NAME needs to be defined, for full features the client has\n"
 				"to send referer information.\n");
 		return EXIT_FAILURE;
-	} 
+	}
 
 	/* check if we have https connection */
 	if (getenv("HTTPS") != NULL)
@@ -273,16 +300,35 @@ int main(int argc, char **argv) {
 		uri = uri_server_name;
 	}
 
+	/* parse config file */
+	if ((ini = iniparser_load(CONFIGFILE)) == NULL) {
+		fprintf(stderr, "cannot parse file " CONFIGFILE ", continue anyway\n");
+	/* continue anyway, there is nothing essential in the config file */
+	} else {
+		scale = get_ini_value(ini, 1, "general", "scale", scale, 1, QRCODE_MAX_SCALE);
+		border = get_ini_value(ini, 1, "general", "border", border, 0, QRCODE_MAX_BORDER);
+		level = get_ini_value(ini, 1, "general", "level", level, QR_ECLEVEL_L, QR_ECLEVEL_H);
+		overwrite = get_ini_value(ini, 0, "general", "allow overwrite", overwrite, 0, 1);
+
+		scale = get_ini_value(ini, 1, server_name, "scale", scale, 1, QRCODE_MAX_SCALE);
+		border = get_ini_value(ini, 1, server_name, "border", border, 0, QRCODE_MAX_BORDER);
+		level = get_ini_value(ini, 1, server_name, "level", level, QR_ECLEVEL_L, QR_ECLEVEL_H);
+		overwrite = get_ini_value(ini, 0, server_name, "allow overwrite", overwrite, 0, 1);
+
+		/* done reading config file, free */
+		iniparser_freedict(ini);
+	}
+
 	/* get query string and read settings */
-	if ((query_string = getenv("QUERY_STRING")) != NULL) {
+	if (overwrite && (query_string = getenv("QUERY_STRING")) != NULL) {
 		/* do we have a special scale? */
-		get_value(query_string, "scale", &scale, QRCODE_SCALE, 1, QRCODE_MAX_SCALE);
+		scale = get_query_value(query_string, "scale", scale, 1, QRCODE_MAX_SCALE);
 
 		/* width of the border? */
-		get_value(query_string, "border", &border, QRCODE_BORDER, 0, QRCODE_MAX_BORDER);
+		border = get_query_value(query_string, "border", border, 0, QRCODE_MAX_BORDER);
 
 		/* error correction level? */
-		get_value(query_string, "level", &level, QRCODE_LEVEL, 0, QR_ECLEVEL_H);
+		level = get_query_value(query_string, "level", level, QR_ECLEVEL_L, QR_ECLEVEL_H);
 	}
 
 	/* encode the QR-Code */
@@ -310,7 +356,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Failed to generate PNG.\n");
 		return EXIT_FAILURE;
 	}
-
 
 	/* free memory we no longer need */
 	if (uri_server_name)

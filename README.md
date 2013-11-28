@@ -14,6 +14,7 @@ Requirements
 
 To compile and run `cqrlogo` you need:
 
+* [iniparser](http://ndevilla.free.fr/iniparser/)
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
 * [zlib](http://www.zlib.net/) (which is a dependency for libpng)
 * [qrencode](http://megaui.net/fukuchi/works/qrencode/index.en.html)
