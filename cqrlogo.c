@@ -247,18 +247,6 @@ int main(int argc, char **argv) {
 	uri_server_name = malloc(10 + strlen(server_name));
 	sprintf(uri_server_name, "http%s://%s/", https ? "s" : "", server_name);
 
-	/* get query string and read settings */
-	if ((query_string = getenv("QUERY_STRING")) != NULL) {
-		/* do we have a special scale? */
-		get_value(query_string, "scale", &scale, QRCODE_SCALE, 1, QRCODE_MAX_SCALE);
-
-		/* width of the border? */
-		get_value(query_string, "border", &border, QRCODE_BORDER, 0, QRCODE_MAX_BORDER);
-
-		/* error correction level? */
-		get_value(query_string, "level", &level, QRCODE_LEVEL, 0, QR_ECLEVEL_H);
-	}
-
 	/* get http referer */
 	if ((http_referer = getenv("HTTP_REFERER")) != NULL) {
 		uri = http_referer;
@@ -283,6 +271,18 @@ int main(int argc, char **argv) {
 	} else {
 		/* use uri assembled from server name */
 		uri = uri_server_name;
+	}
+
+	/* get query string and read settings */
+	if ((query_string = getenv("QUERY_STRING")) != NULL) {
+		/* do we have a special scale? */
+		get_value(query_string, "scale", &scale, QRCODE_SCALE, 1, QRCODE_MAX_SCALE);
+
+		/* width of the border? */
+		get_value(query_string, "border", &border, QRCODE_BORDER, 0, QRCODE_MAX_BORDER);
+
+		/* error correction level? */
+		get_value(query_string, "level", &level, QRCODE_LEVEL, 0, QR_ECLEVEL_H);
 	}
 
 	/* encode the QR-Code */
