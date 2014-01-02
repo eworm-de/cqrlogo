@@ -147,3 +147,7 @@ clean:
 
 distclean:
 	$(RM) -f *.o *~ *.png README.html cqrlogo version.h config.h
+
+release:
+	git archive --format=tar.xz --prefix=cqrlogo-$(VERSION)/ $(VERSION) > cqrlogo-$(VERSION).tar.xz
+	gpg -ab cqrlogo-$(VERSION).tar.xz

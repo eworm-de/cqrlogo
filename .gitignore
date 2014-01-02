@@ -3,3 +3,5 @@ cqrlogo
 *.png
 README.html
 version.h
+cqrlogo-*.tar.xz
+cqrlogo-*.tar.xz.asc
