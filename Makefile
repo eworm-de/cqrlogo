@@ -15,18 +15,19 @@ CFLAGS	+= -liniparser
 CFLAGS	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGS	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGS	+= $(shell pkg-config --cflags --libs libqrencode)
-VERSION := $(shell git describe --tags --long 2>/dev/null)
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
-ifeq ($(VERSION),)
 VERSION := 0.3.5
-endif
 
 all: cqrlogo README.html cqrlogo.png
 
-cqrlogo: cqrlogo.c config.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -o cqrlogo cqrlogo.c \
-		-DVERSION="\"$(VERSION)\""
+cqrlogo: cqrlogo.c config.h version.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o cqrlogo cqrlogo.c
+
+version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
+	echo "#ifndef VERSION" > $@
+	echo "#define VERSION \"$(shell git describe --tags --long 2>/dev/null || echo ${VERSION})\"" >> $@
+	echo "#endif" >> $@
 
 config.h:
 	$(CP) config.def.h config.h
@@ -142,7 +143,7 @@ check:
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
-	$(RM) -f *.o *~ *.png README.html cqrlogo
+	$(RM) -f *.o *~ *.png README.html cqrlogo version.h
 
 distclean:
-	$(RM) -f *.o *~ *.png README.html cqrlogo config.h
+	$(RM) -f *.o *~ *.png README.html cqrlogo version.h config.h

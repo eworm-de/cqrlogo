@@ -2,3 +2,4 @@ config.h
 cqrlogo
 *.png
 README.html
+version.h

@@ -17,6 +17,7 @@
 #include <qrencode.h>
 
 #include "config.h"
+#include "version.h"
 
 /* define structs and functions */
 #include "cqrlogo.h"
