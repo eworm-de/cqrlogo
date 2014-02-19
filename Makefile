@@ -25,7 +25,7 @@ cqrlogo.cgi: cqrlogo.c config.h version.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
 
 cqrlogo.fcgi: cqrlogo.c config.h version.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -lfcgi -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
+	$(CC) $(CFLAGS) -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
 	echo "#ifndef VERSION" > $@
