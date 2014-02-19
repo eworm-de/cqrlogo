@@ -1,5 +1,7 @@
 config.h
 cqrlogo
+cqrlogo.cgi
+cqrlogo.fcgi
 *.png
 README.html
 version.h

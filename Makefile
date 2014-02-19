@@ -19,10 +19,13 @@ CFLAGS	+= $(shell pkg-config --cflags --libs libqrencode)
 # a release tarball...
 VERSION := 0.3.6
 
-all: cqrlogo README.html cqrlogo.png
+all: cqrlogo.cgi cqrlogo.fcgi README.html cqrlogo.png
 
-cqrlogo: cqrlogo.c config.h version.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -o cqrlogo cqrlogo.c
+cqrlogo.cgi: cqrlogo.c config.h version.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
+
+cqrlogo.fcgi: cqrlogo.c config.h version.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -lfcgi -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
 	echo "#ifndef VERSION" > $@
@@ -35,15 +38,16 @@ config.h:
 README.html: README.md
 	$(MD) README.md > README.html
 
-cqrlogo.png: cqrlogo
+cqrlogo.png: cqrlogo.cgi
 	SERVER_NAME="github.com" HTTP_REFERER="https://github.com/eworm-de/cqrlogo" \
 		    QUERY_STRING='scale=4' \
-		    ./cqrlogo | $(SED) '1,/^$$/d' > cqrlogo.png
+		    ./cqrlogo.cgi | $(SED) '1,/^$$/d' > cqrlogo.png
 
 install: install-bin install-doc
 
-install-bin: cqrlogo
-	$(INSTALL) -D -m0755 cqrlogo $(DESTDIR)$(PREFIX)/share/webapps/cqrlogo/cqrlogo
+install-bin: cqrlogo.cgi cqrlogo.fcgi
+	$(INSTALL) -D -m0755 cqrlogo.cgi $(DESTDIR)$(PREFIX)/share/webapps/cqrlogo/cqrlogo.cgi
+	$(INSTALL) -D -m0755 cqrlogo.fcgi $(DESTDIR)$(PREFIX)/share/webapps/cqrlogo/cqrlogo.fcgi
 	$(INSTALL) -D -m0644 cqrlogo.conf $(DESTDIR)/etc/cqrlogo.conf
 
 install-doc: README.html cqrlogo.png
@@ -56,97 +60,184 @@ check:
 	$(RM) -f check.png
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
-		    ./cqrlogo | $(SED) '1,/^$$/d' > check.png
+		    ./cqrlogo.cgi | $(SED) '1,/^$$/d' > check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
-		    ./cqrlogo | $(SED) '1,/^$$/d' > check.png
+		    ./cqrlogo.cgi | $(SED) '1,/^$$/d' > check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^https://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=0' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=4' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=10' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=2&border=0' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=2&border=2' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=2&border=10' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=2&border=10&level=0' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=2&border=10&level=2' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		QUERY_STRING='scale=2&border=10&level=4' \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=eworm.net HTTP_REFERER=http://$(SERVER)/ \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | \
 		$(GREP) -e '^This QR Code has been stolen from http://eworm.net/!$$'
 
 	SERVER_NAME=eworm.net HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
-		./cqrlogo | $(SED) '1,/^$$/d' > \
+		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | \
+		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		    ./cqrlogo.fcgi | $(SED) '1,/^$$/d' > check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
+		    ./cqrlogo.fcgi | $(SED) '1,/^$$/d' > check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^https://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=0' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=4' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=10' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=2&border=0' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=2&border=2' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=2&border=10' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=2&border=10&level=0' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=2&border=10&level=2' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
+		QUERY_STRING='scale=2&border=10&level=4' \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
+
+	SERVER_NAME=eworm.net HTTP_REFERER=http://$(SERVER)/ \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
+		check.png
+	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(ZBARIMG) --raw -q check.png | \
+		$(GREP) -e '^This QR Code has been stolen from http://eworm.net/!$$'
+
+	SERVER_NAME=eworm.net HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
+		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
 	$(ZBARIMG) --raw -q check.png | \
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
-	$(RM) -f *.o *~ *.png README.html cqrlogo version.h
+	$(RM) -f *.o *~ *.png README.html cqrlogo.cgi cqrlogo.fcgi version.h
 
 distclean:
-	$(RM) -f *.o *~ *.png README.html cqrlogo version.h config.h
+	$(RM) -f *.o *~ *.png README.html cqrlogo.cgi cqrlogo.fcgi version.h config.h
 
 release:
 	git archive --format=tar.xz --prefix=cqrlogo-$(VERSION)/ $(VERSION) > cqrlogo-$(VERSION).tar.xz

@@ -18,6 +18,7 @@ To compile and run `cqrlogo` you need:
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
 * [zlib](http://www.zlib.net/) (which is a dependency for libpng)
 * [qrencode](http://megaui.net/fukuchi/works/qrencode/index.en.html)
+* [fcgi](http://www.fastcgi.com/) (for FastCGI support)
 * [markdown](http://daringfireball.net/projects/markdown/) (HTML documentation)
 
 Additionally it is expected to have `make` and `pkg-config` around to

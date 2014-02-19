@@ -16,6 +16,10 @@
 #include <zlib.h>
 #include <qrencode.h>
 
+#if HAVE_FCGI
+#include <fcgi_stdio.h>
+#endif
+
 #include "config.h"
 #include "version.h"
 
@@ -36,6 +40,19 @@ png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, c
 
 	(*textcount)++;
 	return pngtext;
+}
+#endif
+
+#if HAVE_FCGI
+/*** png_write_stdout ***/
+void png_write_stdout(png_structp png_ptr, png_bytep data, png_size_t length) {
+	if (length != fwrite(data, 1, length, png_get_io_ptr(png_ptr)))
+		png_error(png_ptr, "Write Error");
+}
+
+/*** png_flush_stdout ***/
+void png_flush_stdout(png_structp png_ptr) {
+	fflush(stdout);
 }
 #endif
 
@@ -76,7 +93,11 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 #	endif
 
 #	if PNG_ENABLE_TEXT_VERSIONS
-#	define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"
+#if HAVE_FCGI
+#	define VERSIONSTR	VERSION " (FastCGI) (" __DATE__ ", " __TIME__ ")"
+#else
+#	define VERSIONSTR	VERSION " (CGI) (" __DATE__ ", " __TIME__ ")"
+#endif
 #	define LIBSSTR		"libqrencode %s, libpng %s, zlib %s"
 	char *libsstr, *qrver = QRcode_APIVersionString();
 
@@ -109,7 +130,14 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 		}
 	}
 
+#if HAVE_FCGI
+	/* with fastcgi we can not just open stdout for writing...
+	 * define a write function instead */
+	png_set_write_fn(png_ptr, (png_voidp)stdout, png_write_stdout, png_flush_stdout);
+#else
 	png_init_io (png_ptr, stdout);
+#endif
+
 	png_set_rows (png_ptr, info_ptr, row_pointers);
 	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 
@@ -117,8 +145,6 @@ int generate_png (struct bitmap_t *bitmap, const char *uri) {
 		png_free (png_ptr, row_pointers[y]);
 	png_free (png_ptr, row_pointers);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
-
-	fclose(stdout);
 
 	return 0;
 }
@@ -251,13 +277,30 @@ unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section,
 int main(int argc, char **argv) {
 	dictionary * ini;
 	const char * http_referer, * server_name, * query_string, * uri;
-	char * uri_server_name = NULL, * uri_png = NULL, * pattern = NULL, * stolen = NULL;
+	char * uri_server_name, * uri_png, * pattern, * stolen;
 	regex_t preg;
 	regmatch_t pmatch[1];
-	uint8_t https = 0, overwrite = ALLOW_OVERWRITE;
+	uint8_t https, overwrite;
 
 	struct bitmap_t * bitmap;
-	unsigned int scale = QRCODE_SCALE, border = QRCODE_BORDER, level = QRCODE_LEVEL;
+	unsigned int scale, border, level;
+
+#if HAVE_FCGI
+	/* loop for requests */
+	while (FCGI_Accept() >= 0) {
+#endif
+	/* do the variable initialization within the loop! */
+	uri_server_name = NULL;
+	uri_png = NULL;
+	pattern = NULL;
+	stolen = NULL;
+
+	https = 0;
+	overwrite = ALLOW_OVERWRITE;
+
+	scale = QRCODE_SCALE;
+	border = QRCODE_BORDER;
+	level = QRCODE_LEVEL;
 
 	/* check if we have environment variables from CGI */
 	if ((server_name = getenv("SERVER_NAME")) == NULL) {
@@ -366,6 +409,11 @@ int main(int argc, char **argv) {
 	if (uri_png)
 		free(uri_png);
 	bitmap_free(bitmap);
+
+#if HAVE_FCGI
+	/* end of loop */
+	}
+#endif
 
 	return EXIT_SUCCESS;
 }
