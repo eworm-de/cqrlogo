@@ -20,6 +20,14 @@ struct bitmap_t {
 png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text);
 #endif
 
+#if HAVE_FCGI
+/*** png_write_stdout ***/
+void png_write_stdout(png_structp png_ptr, png_bytep data, png_size_t length);
+
+/*** png_flush_stdout ***/
+void png_flush_stdout(png_structp png_ptr);
+#endif
+
 /*** generate_png ***/
 int generate_png (struct bitmap_t *bitmap, const char *uri);
 
