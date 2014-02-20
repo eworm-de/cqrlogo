@@ -18,7 +18,7 @@
 /* pixels are scaled up by this factor */
 #define QRCODE_SCALE		2
 /* this is the maximum scale factor */
-#define QRCODE_MAX_SCALE	8
+#define QRCODE_MAX_SCALE	16
 
 /* width of the border
  * this is defined to at least 4, but works well with less */

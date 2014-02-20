@@ -90,7 +90,7 @@ check:
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
-		QUERY_STRING='scale=10' \
+		QUERY_STRING='scale=20' \
 		./cqrlogo.cgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
@@ -177,7 +177,7 @@ check:
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
-		QUERY_STRING='scale=10' \
+		QUERY_STRING='scale=20' \
 		./cqrlogo.fcgi | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
