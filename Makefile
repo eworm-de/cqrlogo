@@ -19,7 +19,7 @@ CFLAGS	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGS	+= $(shell pkg-config --cflags --libs libqrencode)
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
-VERSION := 0.3.6
+VERSION := 0.4.0
 
 all: cqrlogo.cgi cqrlogo.fcgi README.html cqrlogo.png
 
