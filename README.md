@@ -41,7 +41,7 @@ followed by:
 
 > make install
 
-This will place an executable at `/usr/share/webapps/cqrlogo/cqrlogo`,
+This will place an executable at `/usr/lib/cqrlogo/cqrlogo`,
 documentation can be found in `/usr/share/doc/cqrlogo/`.
 
 The file `config.h` (copy from `config.def.h` if it does not exist) provides

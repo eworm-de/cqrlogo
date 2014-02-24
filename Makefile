@@ -1,6 +1,7 @@
 # cqrlogo - CGI QR-Code logo for web services
 
 PREFIX	:= /usr
+LIBDIR	:= $(PREFIX)/lib
 APACHECONF	:= /etc/apache/conf/extra/
 LIGHTTPDCONF	:= /etc/lighttpd/conf.d/
 CC	:= gcc
@@ -48,8 +49,8 @@ cqrlogo.png: cqrlogo.cgi
 install: install-bin install-config install-doc
 
 install-bin: cqrlogo.cgi cqrlogo.fcgi
-	$(INSTALL) -D -m0755 cqrlogo.cgi $(DESTDIR)$(PREFIX)/share/webapps/cqrlogo/cqrlogo.cgi
-	$(INSTALL) -D -m0755 cqrlogo.fcgi $(DESTDIR)$(PREFIX)/share/webapps/cqrlogo/cqrlogo.fcgi
+	$(INSTALL) -D -m0755 cqrlogo.cgi $(DESTDIR)$(LIBDIR)/cqrlogo/cqrlogo.cgi
+	$(INSTALL) -D -m0755 cqrlogo.fcgi $(DESTDIR)$(LIBDIR)/cqrlogo/cqrlogo.fcgi
 	$(INSTALL) -D -m0644 cqrlogo.conf $(DESTDIR)/etc/cqrlogo.conf
 
 install-config: config/apache.conf config/lighttpd.conf
