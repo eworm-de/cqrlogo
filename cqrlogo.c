@@ -12,7 +12,7 @@
 
 /*** main ***/
 int main(int argc, char **argv) {
-	const char * http_referer, * server_name, * query_string, * uri;
+	const char * http_referer, * server_name, * uri;
 	char * uri_server_name, * pattern, * stolen;
 	regex_t preg;
 	regmatch_t pmatch[1];
