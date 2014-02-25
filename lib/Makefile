@@ -8,9 +8,6 @@ CFLAGS	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGS	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGS	+= $(shell pkg-config --cflags --libs libqrencode)
 
-# library abi version
-SOVERSION	:= 0
-
 all: libcqrlogo
 
 libcqrlogo: libcqrlogo.c libcqrlogo.h ../config.h ../version.h

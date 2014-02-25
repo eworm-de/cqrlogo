@@ -23,11 +23,13 @@ CQRLOGO_FCGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.fcgi
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
 VERSION := 0.4.0
+# library abi version
+SOVERSION	:= 0
 
 all: libcqrlogo cqrlogo.cgi cqrlogo.fcgi README.html cqrlogo.png
 
 libcqrlogo: lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
-	$(MAKE) -C lib
+	SOVERSION=$(SOVERSION) $(MAKE) -C lib
 
 cqrlogo.cgi: libcqrlogo cqrlogo.c cqrlogo.h config.h version.h
 	$(CC) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
