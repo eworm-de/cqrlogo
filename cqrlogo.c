@@ -104,7 +104,10 @@ int main(int argc, char **argv) {
 	}
 
 	/* write PNG data to stdout */
-	fwrite(png->buffer, png->size, 1, stdout);
+	if (fwrite(png->buffer, png->size, 1, stdout) != 1) {
+		fprintf(stderr, "Failed writing PNG data to stdout.\n");
+		return EXIT_FAILURE;
+	}
 
 	/* free memory we no longer need */
 	if (uri_server_name)
