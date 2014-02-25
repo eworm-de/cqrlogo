@@ -13,7 +13,7 @@
 /*** main ***/
 int main(int argc, char **argv) {
 	const char * http_referer, * server_name, * query_string, * uri;
-	char * uri_server_name, * uri_png, * pattern, * stolen;
+	char * uri_server_name, * pattern, * stolen;
 	regex_t preg;
 	regmatch_t pmatch[1];
 	uint8_t https;
@@ -28,7 +28,6 @@ int main(int argc, char **argv) {
 #endif
 	/* do the variable initialization within the loop! */
 	uri_server_name = NULL;
-	uri_png = NULL;
 	pattern = NULL;
 	stolen = NULL;
 
@@ -98,13 +97,6 @@ int main(int argc, char **argv) {
 	/* print HTTP header */
 	printf("Content-Type: image/png\n\n");
 
-	/* cut uri, text in png file may have a max length of 79 chars */
-	if (strlen(uri) > 79) {
-		uri_png = strdup(uri);
-		sprintf(uri_png + 76, "...");
-		uri = uri_png;
-	}
-
 	/* generate PNG data */
 	if ((png = generate_png(bitmap, CQR_COMMENT|CQR_REFERER|CQR_VERSION|CQR_LIBVERSION, uri)) == NULL) {
 		fprintf(stderr, "Failed to generate PNG.\n");
@@ -119,8 +111,6 @@ int main(int argc, char **argv) {
 		free(uri_server_name);
 	if (stolen)
 		free(stolen);
-	if (uri_png)
-		free(uri_png);
 	bitmap_free(bitmap);
 	if (png->size > 0)
 		free(png->buffer);

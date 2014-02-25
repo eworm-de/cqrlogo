@@ -73,13 +73,20 @@ struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const 
 #if defined PNG_TEXT_SUPPORTED
 	unsigned int textcount = 0;
 	png_text *pngtext = NULL;
-	char *libsstr = NULL, *qrver;
+	char *curi = NULL, *libsstr = NULL, *qrver;
 
 	if (meta & CQR_COMMENT)
 		pngtext = add_png_text(pngtext, &textcount, "comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo");
 
-	if (meta & CQR_REFERER)
-		pngtext = add_png_text(pngtext, &textcount, "referer", (char *)uri);
+	if (meta & CQR_REFERER) {
+		curi = strdup(uri);
+
+		/* text in png file may have a max length of 79 chars */
+		if (strlen(curi) > 79)
+			sprintf(curi + 76, "...");
+
+		pngtext = add_png_text(pngtext, &textcount, "referer", curi);
+	}
 
 	if (meta & CQR_VERSION)
 		pngtext = add_png_text(pngtext, &textcount, "version", VERSIONSTR);
@@ -95,6 +102,9 @@ struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const 
 
 	png_set_text(png_ptr, info_ptr, pngtext, textcount);
 	png_free (png_ptr, pngtext);
+
+	if (curi)
+		free(curi);
 	if (libsstr)
 		free(libsstr);
 #endif
