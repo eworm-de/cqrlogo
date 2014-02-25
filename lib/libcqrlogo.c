@@ -76,7 +76,7 @@ struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const 
 	char *curi = NULL, *libsstr = NULL, *qrver;
 
 	if (meta & CQR_COMMENT)
-		pngtext = add_png_text(pngtext, &textcount, "comment", "QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo");
+		pngtext = add_png_text(pngtext, &textcount, "comment", COMMENTSTR);
 
 	if (meta & CQR_REFERER) {
 		curi = strdup(uri);

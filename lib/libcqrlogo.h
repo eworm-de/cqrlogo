@@ -45,6 +45,7 @@ struct cqrconf_t {
 #define CQR_VERSION	0x4
 #define CQR_LIBVERSION	0x8
 
+#define COMMENTSTR	"QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo"
 #define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"
 #define LIBSSTR		"libqrencode %s, libpng %s, zlib %s"
 
