@@ -8,9 +8,9 @@ CFLAGS	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGS	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGS	+= $(shell pkg-config --cflags --libs libqrencode)
 
-all: libcqrlogo
+all: libcqrlogo.so
 
-libcqrlogo: libcqrlogo.c libcqrlogo.h ../config.h ../version.h
+libcqrlogo.so: libcqrlogo.c libcqrlogo.h ../config.h ../version.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -fPIC -Wl,-soname,libcqrlogo.so.$(SOVERSION) -o libcqrlogo.so.$(SOVERSION) libcqrlogo.c
 	$(LN) -sf libcqrlogo.so.$(SOVERSION) libcqrlogo.so
 

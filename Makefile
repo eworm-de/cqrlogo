@@ -26,15 +26,15 @@ VERSION := 0.4.0
 # library abi version
 SOVERSION	:= 0
 
-all: libcqrlogo cqrlogo.cgi cqrlogo.fcgi README.html cqrlogo.png
+all: lib/libcqrlogo.so cqrlogo.cgi cqrlogo.fcgi README.html cqrlogo.png
 
-libcqrlogo: lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
+lib/libcqrlogo.so: lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
 	SOVERSION=$(SOVERSION) $(MAKE) -C lib
 
-cqrlogo.cgi: libcqrlogo cqrlogo.c cqrlogo.h config.h version.h
+cqrlogo.cgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
 	$(CC) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
 
-cqrlogo.fcgi: libcqrlogo cqrlogo.c cqrlogo.h config.h version.h
+cqrlogo.fcgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
 	$(CC) -lcqrlogo -Llib/ -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
@@ -55,7 +55,7 @@ cqrlogo.png: cqrlogo.cgi
 
 install: install-bin install-config install-doc
 
-install-bin: libcqrlogo lib/libcqrlogo.h cqrlogo.cgi cqrlogo.fcgi cqrlogo.conf
+install-bin: lib/libcqrlogo.so lib/libcqrlogo.h cqrlogo.cgi cqrlogo.fcgi cqrlogo.conf
 	$(INSTALL) -D -m0755 lib/libcqrlogo.so.$(SOVERSION) $(DESTDIR)$(PREFIX)/lib/libcqrlogo.so.$(SOVERSION)
 	$(INSTALL) -D -m0755 lib/libcqrlogo.h $(DESTDIR)$(PREFIX)/include/libcqrlogo.h
 	$(LN) -sf libcqrlogo.so.$(SOVERSION) $(DESTDIR)$(PREFIX)/lib/libcqrlogo.so
