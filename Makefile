@@ -32,10 +32,10 @@ lib/libcqrlogo.so: lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
 	SOVERSION=$(SOVERSION) $(MAKE) -C lib
 
 cqrlogo.cgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
-	$(CC) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
+	$(CC) $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
 
 cqrlogo.fcgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
-	$(CC) -lcqrlogo -Llib/ -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
+	$(CC) $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
 	echo "#ifndef VERSION" > $@
