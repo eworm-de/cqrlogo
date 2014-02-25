@@ -9,11 +9,11 @@
 #define _CONFIG_H
 
 /* path to the config file */
-#define CONFIGFILE	"/etc/cqrlogo.conf"
+#define CONFIGFILE		"/etc/cqrlogo.conf"
 
 /* whether or not defaults or settings from config may be overwritten
  * by query string */
-#define ALLOW_OVERWRITE	1
+#define ALLOW_OVERWRITE		1
 
 /* pixels are scaled up by this factor */
 #define QRCODE_SCALE		2
@@ -32,19 +32,9 @@
  *                  QR_ECLEVEL_Q (about 25%)
  *                  QR_ECLEVEL_H (highest, about 30%)
  * image size raises with higher levels */
-#define QRCODE_LEVEL	QR_ECLEVEL_L
+#define QRCODE_LEVEL		QR_ECLEVEL_L
 /* note that changing the level at runtime requies
  * a numeric value from 0 to 3 */
-
-/* if you really, really, really want to save some bytes...
- * It is possible to disable text information in PNG file completly, though
- * nobody will have an idea where you got this great software...
- * So please do not. */
-#define PNG_ENABLE_TEXT	1
-/* do you want version information within the PNG file? */
-#define PNG_ENABLE_TEXT_VERSIONS 1
-/* add referer information to the PNG file? */
-#define PNG_ENABLE_TEXT_REFERER 1
 
 #endif /* _CONFIG_H */
 

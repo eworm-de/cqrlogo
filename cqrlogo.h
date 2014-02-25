@@ -8,45 +8,24 @@
 #ifndef _CQRLOGO_H
 #define _CQRLOGO_H
 
-/* a bitmap */
-struct bitmap_t {
-	unsigned int width;
-	unsigned int height;
-	uint8_t *pixel;
-};
-
-#if defined PNG_TEXT_SUPPORTED && PNG_ENABLE_TEXT
-/*** add_png_text ***/
-png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text);
-#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include <regex.h>
+#include <stdbool.h>
 
 #if HAVE_FCGI
-/*** png_write_stdout ***/
-void png_write_stdout(png_structp png_ptr, png_bytep data, png_size_t length);
-
-/*** png_flush_stdout ***/
-void png_flush_stdout(png_structp png_ptr);
+#include <fcgi_stdio.h>
 #endif
 
-/*** generate_png ***/
-int generate_png (struct bitmap_t *bitmap, const char *uri);
+#include <libcqrlogo.h>
 
-/*** bitmap_new ***/
-struct bitmap_t * bitmap_new(int width, int height);
-/*** bitmap_free ***/
-void bitmap_free(struct bitmap_t * bitmap);
+#define URLPATTERN "^[hH][tT][tT][pP][sS]\\?://%s/"
+#define TEXTSTOLEN "This QR Code has been stolen from http%s://%s/!"
 
-/*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (const char *text, unsigned int scale,
-		unsigned int border, unsigned int level);
-
-/*** get_query_value ***/
-unsigned int get_query_value(const char *query_string, const char *pattern,
-		unsigned int value, unsigned int min, unsigned int max);
-
-/*** get_ini_value ***/
-unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,
-		unsigned int value, unsigned int min, unsigned int max);
+/*** main ***/
+int main(int argc, char **argv);
 
 #endif /* _CQRLOGO_H */
 
