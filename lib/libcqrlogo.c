@@ -75,38 +75,40 @@ struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const 
 	png_text *pngtext = NULL;
 	char *curi = NULL, *libsstr = NULL, *qrver;
 
-	if (meta & CQR_COMMENT)
-		pngtext = add_png_text(pngtext, &textcount, "comment", COMMENTSTR);
+	if (meta) {
+		if (meta & CQR_COMMENT)
+			pngtext = add_png_text(pngtext, &textcount, "comment", COMMENTSTR);
 
-	if (meta & CQR_REFERER) {
-		curi = strdup(uri);
+		if (meta & CQR_REFERER) {
+			curi = strdup(uri);
 
-		/* text in png file may have a max length of 79 chars */
-		if (strlen(curi) > 79)
-			sprintf(curi + 76, "...");
+			/* text in png file may have a max length of 79 chars */
+			if (strlen(curi) > 79)
+				sprintf(curi + 76, "...");
 
-		pngtext = add_png_text(pngtext, &textcount, "referer", curi);
+			pngtext = add_png_text(pngtext, &textcount, "referer", curi);
+		}
+
+		if (meta & CQR_VERSION)
+			pngtext = add_png_text(pngtext, &textcount, "version", VERSIONSTR);
+
+		if (meta & CQR_LIBVERSION) {
+			qrver = QRcode_APIVersionString();
+
+			libsstr = malloc(sizeof(LIBSSTR) + strlen(qrver) + strlen(png_libpng_ver) + strlen(zlib_version));
+			sprintf(libsstr, LIBSSTR, qrver, png_libpng_ver, zlib_version);
+
+			pngtext = add_png_text(pngtext, &textcount, "libs", libsstr);
+		}
+
+		png_set_text(png_ptr, info_ptr, pngtext, textcount);
+		png_free (png_ptr, pngtext);
+
+		if (curi)
+			free(curi);
+		if (libsstr)
+			free(libsstr);
 	}
-
-	if (meta & CQR_VERSION)
-		pngtext = add_png_text(pngtext, &textcount, "version", VERSIONSTR);
-
-	if (meta & CQR_LIBVERSION) {
-		qrver = QRcode_APIVersionString();
-
-		libsstr = malloc(sizeof(LIBSSTR) + strlen(qrver) + strlen(png_libpng_ver) + strlen(zlib_version));
-		sprintf(libsstr, LIBSSTR, qrver, png_libpng_ver, zlib_version);
-
-		pngtext = add_png_text(pngtext, &textcount, "libs", libsstr);
-	}
-
-	png_set_text(png_ptr, info_ptr, pngtext, textcount);
-	png_free (png_ptr, pngtext);
-
-	if (curi)
-		free(curi);
-	if (libsstr)
-		free(libsstr);
 #endif
 
 	row_pointers = png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
