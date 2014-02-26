@@ -65,3 +65,56 @@ Runtime options can be given with request method GET. These are available:
 * `border`: width of the border
 * `level`: error correction level
 
+Library
+-------
+
+This now uses a shared library the can be used to create CGI executables for
+your custom needs. This is minimal sample source code:
+
+    #include <libcqrlogo.h>
+
+    int main(int argc, char **argv) {
+            struct bitmap_t * bitmap;
+            struct png_t * png;
+            struct cqrconf_t cqrconf;
+
+            cqrconf.scale = 2;
+            cqrconf.border = 1;
+            cqrconf.level = 0;
+            cqrconf.overwrite = 1;
+
+            /* encode the QR-Code */
+            if ((bitmap = encode_qrcode("https://github.com/eworm-de/cqrlogo", cqrconf)) == NULL) {
+                    fprintf(stderr, "Could not generate QR-Code.\n");
+                    return EXIT_FAILURE;
+            }
+
+            /* generate PNG data */
+            if ((png = generate_png(bitmap, CQR_COMMENT|CQR_VERSION|CQR_LIBVERSION, "https://github.com/eworm-de/cqrlogo")) == NULL) {
+                    fprintf(stderr, "Failed to generate PNG.\n");
+                    return EXIT_FAILURE;
+            }
+
+            /* print HTTP header */
+            printf("Content-Type: image/png\n\n");
+
+            /* write PNG data to stdout */
+            if (fwrite(png->buffer, png->size, 1, stdout) != 1) {
+                    fprintf(stderr, "Failed writing PNG data to stdout.\n");
+                    return EXIT_FAILURE;
+            }
+
+            /* free memory we no longer need */
+            bitmap_free(bitmap);
+            if (png->size > 0)
+                    free(png->buffer);
+            free(png);
+
+            return EXIT_SUCCESS;
+    }
+
+Save this code to `cqrlogo.c` and run:
+
+> gcc -lcqrlogo -o cqrlogo.cgi cqrlogo.c
+
+This will result in a CGI executable `cqrlogo.cgi`.
