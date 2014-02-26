@@ -94,14 +94,14 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* print HTTP header */
-	printf("Content-Type: image/png\n\n");
-
 	/* generate PNG data */
 	if ((png = generate_png(bitmap, CQR_COMMENT|CQR_REFERER|CQR_VERSION|CQR_LIBVERSION, uri)) == NULL) {
 		fprintf(stderr, "Failed to generate PNG.\n");
 		return EXIT_FAILURE;
 	}
+
+	/* print HTTP header */
+	printf("Content-Type: image/png\n\n");
 
 	/* write PNG data to stdout */
 	if (fwrite(png->buffer, png->size, 1, stdout) != 1) {
