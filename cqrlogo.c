@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
 	regmatch_t pmatch[1];
 	uint8_t https;
 
-	struct png_t * png;
-	struct bitmap_t * bitmap;
-	struct cqrconf_t cqrconf;
+	struct cqr_png * png;
+	struct cqr_bitmap * bitmap;
+	struct cqr_conf conf;
 
 #if HAVE_FCGI
 	/* loop for requests */
@@ -34,10 +34,10 @@ int main(int argc, char **argv) {
 	https = 0;
 
 	/* these default values are defined in config.h */
-	cqrconf.scale = QRCODE_SCALE;
-	cqrconf.border = QRCODE_BORDER;
-	cqrconf.level = QRCODE_LEVEL;
-	cqrconf.overwrite = ALLOW_OVERWRITE;
+	conf.scale = QRCODE_SCALE;
+	conf.border = QRCODE_BORDER;
+	conf.level = QRCODE_LEVEL;
+	conf.overwrite = ALLOW_OVERWRITE;
 
 	/* check if we have environment variables from CGI */
 	if ((server_name = getenv("SERVER_NAME")) == NULL) {
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 		pattern = malloc(sizeof(URLPATTERN) + strlen(server_name));
 		sprintf(pattern, URLPATTERN, server_name);
 		if (regcomp(&preg, pattern, 0) != 0) {
-			fprintf(stderr, "regcomp() failed, returning nonzero\n");
+			fprintf(stderr, "regcomp() failed, returning nonzero.\n");
 			return EXIT_FAILURE;
 		}
 
@@ -81,27 +81,27 @@ int main(int argc, char **argv) {
 		uri = uri_server_name;
 	}
 
-	cqrconf_file(server_name, &cqrconf);
-	cqrconf_string(getenv("QUERY_STRING"), &cqrconf);
+	cqr_conf_file(server_name, &conf);
+	cqr_conf_string(getenv("QUERY_STRING"), &conf);
 
 	/* encode the QR-Code */
-	if ((bitmap = encode_qrcode(uri, cqrconf)) == NULL) {
+	if ((bitmap = cqr_encode_qrcode_to_bitmap(uri, conf)) == NULL) {
 		/* uri too long? retry with uri from server name */
 		uri = uri_server_name;
-		if ((bitmap = encode_qrcode(uri, cqrconf)) == NULL) {
+		if ((bitmap = cqr_encode_qrcode_to_bitmap(uri, conf)) == NULL) {
 			fprintf(stderr, "Could not generate QR-Code.\n");
 			return EXIT_FAILURE;
 		}
 	}
 
 	/* generate PNG data */
-	if ((png = generate_png(bitmap, CQR_COMMENT|CQR_REFERER|CQR_VERSION|CQR_LIBVERSION, uri)) == NULL) {
+	if ((png = cqr_bitmap_to_png(bitmap, uri, CQR_META_ALL)) == NULL) {
 		fprintf(stderr, "Failed to generate PNG.\n");
 		return EXIT_FAILURE;
 	}
 
 	/* print HTTP header */
-	printf("Content-Type: image/png\n\n");
+	printf(cqr_mimeheader);
 
 	/* write PNG data to stdout */
 	if (fwrite(png->buffer, png->size, 1, stdout) != 1) {
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 		free(uri_server_name);
 	if (stolen)
 		free(stolen);
-	bitmap_free(bitmap);
+	cqr_bitmap_free(bitmap);
 	if (png->size > 0)
 		free(png->buffer);
 	free(png);

@@ -20,65 +20,69 @@
 #include <iniparser.h>
 
 /* a bitmap */
-struct bitmap_t {
+struct cqr_bitmap {
 	unsigned int width;
 	unsigned int height;
 	uint8_t *pixel;
 };
 
 /* finished PNG image */
-struct png_t {
+struct cqr_png {
 	unsigned char * buffer;
 	size_t size;
 };
 
 /* config */
-struct cqrconf_t {
+struct cqr_conf {
 	uint8_t scale;
 	uint8_t border;
 	uint8_t level;
 	bool overwrite;
 };
 
-#define CQR_COMMENT	0x1
-#define CQR_REFERER	0x2
-#define CQR_VERSION	0x4
-#define CQR_LIBVERSION	0x8
+const char * cqr_mimeheader = "Content-Type: image/png\n\n";
 
-#define COMMENTSTR	"QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo"
-#define VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"
-#define LIBSSTR		"libqrencode %s, libpng %s, zlib %s"
+#define CQR_META_COMMENT	0x1
+#define CQR_META_REFERER	0x2
+#define CQR_META_VERSION	0x4
+#define CQR_META_LIBVERSION	0x8
+#define CQR_META_ALL		CQR_META_COMMENT + CQR_META_REFERER + CQR_META_VERSION + CQR_META_LIBVERSION
 
-/*** png_write_stdout ***/
-void png_write_fn(png_structp png_ptr, png_bytep data, png_size_t length);
+#define CQR_COMMENTSTR	"QR-Code created by cqrlogo - https://github.com/eworm-de/cqrlogo"
+#define CQR_VERSIONSTR	VERSION " (" __DATE__ ", " __TIME__ ")"
+#define CQR_LIBSSTR	"libqrencode %s, libpng %s, zlib %s"
+
+/*** cqr_png_write_fn ***/
+void cqr_png_write_fn(png_structp png_ptr, png_bytep data, png_size_t length);
 
 #if defined PNG_TEXT_SUPPORTED
-/*** add_png_text ***/
-png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text);
+/*** cqr_png_add_text ***/
+png_text * cqr_png_add_text(png_text *pngtext, unsigned int *textcount, char *key, char *text);
 #endif
 
-/*** generate_png ***/
-struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const char *uri);
+/*** cqr_bitmap_new ***/
+struct cqr_bitmap * cqr_bitmap_new(int width, int height);
+/*** cqr_bitmap_free ***/
+void cqr_bitmap_free(struct cqr_bitmap * bitmap);
 
-/*** bitmap_new ***/
-struct bitmap_t * bitmap_new(int width, int height);
-/*** bitmap_free ***/
-void bitmap_free(struct bitmap_t * bitmap);
+/*** cqr_encode_qrcode_to_bitmap ***/
+struct cqr_bitmap * cqr_encode_qrcode_to_bitmap(const char *text, const struct cqr_conf conf);
+/*** cqr_bitmap_to_png ***/
+struct cqr_png * cqr_bitmap_to_png(struct cqr_bitmap *bitmap, const char *text, const uint8_t meta);
+/*** cqr_encode_qrcode_to_png ***/
+struct cqr_png * cqr_encode_qrcode_to_png(const char *text, const struct cqr_conf conf, const uint8_t meta);
 
-/*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (const char *text, const struct cqrconf_t);
-
-/*** get_query_value ***/
-unsigned int get_query_value(const char *query_string, const char *pattern,
+/*** cqr_get_query_value ***/
+unsigned int cqr_get_query_value(const char *query_string, const char *pattern,
 	unsigned int value, unsigned int min, unsigned int max);
-/*** get_ini_value ***/
-unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,
+/*** cqr_get_ini_value ***/
+unsigned int cqr_get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,
 	unsigned int value, unsigned int min, unsigned int max);
 
-/*** cqrconf_file ***/
-void cqrconf_file(const char * server_name, struct cqrconf_t * cqrconf);
-/*** cqrconf_string ***/
-void cqrconf_string(const char * query_string, struct cqrconf_t * cqrconf);
+/*** cqr_conf_file ***/
+void cqr_conf_file(const char * server_name, struct cqr_conf * conf);
+/*** cqr_conf_string ***/
+void cqr_conf_string(const char * query_string, struct cqr_conf * conf);
 
 #endif /* _LIBCQRLOGO_H */
 

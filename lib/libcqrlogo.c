@@ -11,11 +11,11 @@
 /* define structs and functions */
 #include "libcqrlogo.h"
 
-/*** png_write_stdout ***/
-void png_write_fn(png_structp png_ptr, png_bytep data, png_size_t length) {
-	struct png_t * png;
+/*** cqr_png_write_fn ***/
+void cqr_png_write_fn(png_structp png_ptr, png_bytep data, png_size_t length) {
+	struct cqr_png * png;
 
-	png = (struct png_t *)png_get_io_ptr(png_ptr);
+	png = (struct cqr_png *)png_get_io_ptr(png_ptr);
 
 	png->buffer = realloc(png->buffer, png->size + length);
 
@@ -25,8 +25,8 @@ void png_write_fn(png_structp png_ptr, png_bytep data, png_size_t length) {
 }
 
 #if defined PNG_TEXT_SUPPORTED
-/*** add_png_text ***/
-png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, char *text) {
+/*** cqr_png_add_text ***/
+png_text * cqr_png_add_text(png_text *pngtext, unsigned int *textcount, char *key, char *text) {
 	pngtext = realloc(pngtext, ((*textcount) + 1) * sizeof(png_text));
 
 	pngtext[*textcount].compression = PNG_TEXT_COMPRESSION_zTXt;
@@ -38,16 +38,89 @@ png_text * add_png_text(png_text *pngtext, unsigned int *textcount, char *key, c
 }
 #endif
 
-/*** generate_png ***/
-struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const char *uri) {
+/*** cqr_bitmap_new ***/
+struct cqr_bitmap * cqr_bitmap_new(int width, int height) {
+	struct cqr_bitmap *bitmap;
+
+	if ((bitmap = malloc(sizeof(struct cqr_bitmap))) == NULL)
+		return NULL;
+
+	bitmap->width = width;
+	bitmap->height = height;
+	if ((bitmap->pixel = malloc(width * height * sizeof(uint8_t))) == NULL) {
+		free(bitmap);
+		return NULL;
+	}
+
+	/* initialize with white */
+	memset(bitmap->pixel, 0xff, width * height);
+
+	return bitmap;
+}
+
+/*** cqr_bitmap_free ***/
+void cqr_bitmap_free(struct cqr_bitmap * bitmap) {
+	free(bitmap->pixel);
+	free(bitmap);
+}
+
+/*** cqr_encode_qrcode_to_bitmap ***/
+struct cqr_bitmap * cqr_encode_qrcode_to_bitmap(const char *text, const struct cqr_conf conf) {
+	QRcode *qrcode;
+	struct cqr_bitmap *bitmap, *scaled;
+	int i, j, k, l;
+	unsigned char *data;
+
+	qrcode = QRcode_encodeString8bit(text, 0, conf.level);
+
+	/* this happens if the string is too long
+	 * possibly we have an URL (referer) that is too long, so the code
+	 * automatically falls back to http_server (see main()) */
+	if (qrcode == NULL)
+		return NULL;
+
+	data = qrcode->data;
+
+	/* wirte QR code to bitmap */
+	if ((bitmap = cqr_bitmap_new(qrcode->width + conf.border * 2, qrcode->width + conf.border * 2)) == NULL)
+		return NULL;
+	for (i = conf.border; i < qrcode->width + conf.border; i++)
+		for (j = conf.border; j < qrcode->width + conf.border; j++) {
+			bitmap->pixel[i * (qrcode->width + conf.border * 2) + j] = !(*data & 0x1) * 0xff;
+			data++;
+		}
+
+	QRcode_free(qrcode);
+
+	if (conf.scale == 1)
+		return bitmap;
+
+	/* scale bitmap */
+	if ((scaled = cqr_bitmap_new(bitmap->width * conf.scale, bitmap->height * conf.scale)) == NULL)
+		return NULL;
+	for (i = 0; i < bitmap->height; i++)
+		for (j = 0; j < bitmap->width; j++)
+			for (k = 0; k < conf.scale; k++)
+				for (l = 0; l < conf.scale; l++)
+					scaled->pixel[i * bitmap->width * conf.scale * conf.scale + k * bitmap->width * conf.scale + j * conf.scale + l] =
+						bitmap->pixel[i * bitmap->width + j];
+
+
+	cqr_bitmap_free(bitmap);
+
+	return scaled;
+}
+
+/*** cqr_bitmap_to_png ***/
+struct cqr_png * cqr_bitmap_to_png(struct cqr_bitmap *bitmap, const char *text,  const uint8_t meta) {
 	png_structp png_ptr = NULL;
 	png_infop info_ptr = NULL;
 	png_byte ** row_pointers = NULL;
 	unsigned int x, y;
 	uint8_t bit, byte;
-	struct png_t * png;
+	struct cqr_png * png;
 
-	png = malloc(sizeof(struct png_t));
+	png = malloc(sizeof(struct cqr_png));
 	png->buffer = NULL;
 	png->size = 0;
 
@@ -73,39 +146,39 @@ struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const 
 #if defined PNG_TEXT_SUPPORTED
 	unsigned int textcount = 0;
 	png_text *pngtext = NULL;
-	char *curi = NULL, *libsstr = NULL, *qrver;
+	char *referer = NULL, *libsstr = NULL, *qrver;
 
 	if (meta) {
-		if (meta & CQR_COMMENT)
-			pngtext = add_png_text(pngtext, &textcount, "comment", COMMENTSTR);
+		if (meta & CQR_META_COMMENT)
+			pngtext = cqr_png_add_text(pngtext, &textcount, "comment", CQR_COMMENTSTR);
 
-		if (meta & CQR_REFERER) {
-			curi = strdup(uri);
+		if (meta & CQR_META_REFERER) {
+			referer = strdup(text);
 
 			/* text in png file may have a max length of 79 chars */
-			if (strlen(curi) > 79)
-				sprintf(curi + 76, "...");
+			if (strlen(referer) > 79)
+				sprintf(referer + 76, "...");
 
-			pngtext = add_png_text(pngtext, &textcount, "referer", curi);
+			pngtext = cqr_png_add_text(pngtext, &textcount, "referer", referer);
 		}
 
-		if (meta & CQR_VERSION)
-			pngtext = add_png_text(pngtext, &textcount, "version", VERSIONSTR);
+		if (meta & CQR_META_VERSION)
+			pngtext = cqr_png_add_text(pngtext, &textcount, "version", CQR_VERSIONSTR);
 
-		if (meta & CQR_LIBVERSION) {
+		if (meta & CQR_META_LIBVERSION) {
 			qrver = QRcode_APIVersionString();
 
-			libsstr = malloc(sizeof(LIBSSTR) + strlen(qrver) + strlen(png_libpng_ver) + strlen(zlib_version));
-			sprintf(libsstr, LIBSSTR, qrver, png_libpng_ver, zlib_version);
+			libsstr = malloc(sizeof(CQR_LIBSSTR) + strlen(qrver) + strlen(png_libpng_ver) + strlen(zlib_version));
+			sprintf(libsstr, CQR_LIBSSTR, qrver, png_libpng_ver, zlib_version);
 
-			pngtext = add_png_text(pngtext, &textcount, "libs", libsstr);
+			pngtext = cqr_png_add_text(pngtext, &textcount, "libs", libsstr);
 		}
 
 		png_set_text(png_ptr, info_ptr, pngtext, textcount);
 		png_free (png_ptr, pngtext);
 
-		if (curi)
-			free(curi);
+		if (referer)
+			free(referer);
 		if (libsstr)
 			free(libsstr);
 	}
@@ -128,90 +201,36 @@ struct png_t * generate_png (struct bitmap_t *bitmap, const uint8_t meta, const 
 
 	/* with FastCGI we can not just open stdout for writing...
 	 * define a write function instead */
-	png_set_write_fn(png_ptr, png, png_write_fn, NULL);
+	png_set_write_fn(png_ptr, png, cqr_png_write_fn, NULL);
 
-	png_set_rows (png_ptr, info_ptr, row_pointers);
-	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+	png_set_rows(png_ptr, info_ptr, row_pointers);
+	png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 
 	for (y = 0; y < bitmap->height; ++y)
-		png_free (png_ptr, row_pointers[y]);
-	png_free (png_ptr, row_pointers);
+		png_free(png_ptr, row_pointers[y]);
+	png_free(png_ptr, row_pointers);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 
 	return png;
 }
 
-/*** bitmap_new ***/
-struct bitmap_t * bitmap_new(int width, int height) {
-	struct bitmap_t *bitmap;
+/*** cqr_encode_qrcode_to_png ***/
+struct cqr_png * cqr_encode_qrcode_to_png(const char *text, const struct cqr_conf conf, const uint8_t meta) {
+	struct cqr_bitmap * bitmap;
+	struct cqr_png * png;
 
-	if ((bitmap = malloc(sizeof(struct bitmap_t))) == NULL)
+	if ((bitmap = cqr_encode_qrcode_to_bitmap(text, conf)) == NULL) {
+		fprintf(stderr, "Failed encoding QR-Code to bitmap.\n");
 		return NULL;
-
-	bitmap->width = width;
-	bitmap->height = height;
-	if ((bitmap->pixel = malloc(width * height * sizeof(uint8_t))) == NULL) {
-		free(bitmap);
+	}
+	if ((png = cqr_bitmap_to_png(bitmap, text, meta)) == NULL) {
+		fprintf(stderr, "Failed to convert bitmap to png.\n");
 		return NULL;
 	}
 
-	/* initialize with white */
-	memset(bitmap->pixel, 0xff, width * height);
+	cqr_bitmap_free(bitmap);
 
-	return bitmap;
-}
-
-/*** bitmap_free ***/
-void bitmap_free(struct bitmap_t * bitmap) {
-	free(bitmap->pixel);
-	free(bitmap);
-}
-
-/*** encode_qrcode ***/
-struct bitmap_t * encode_qrcode (const char *text, const struct cqrconf_t cqrconf) {
-	QRcode *qrcode;
-	struct bitmap_t *bitmap, *scaled;
-	int i, j, k, l;
-	unsigned char *data;
-
-	qrcode = QRcode_encodeString8bit(text, 0, cqrconf.level);
-
-	/* this happens if the string is too long
-	 * possibly we have an URL (referer) that is too long, so the code
-	 * automatically falls back to http_server (see main()) */
-	if (qrcode == NULL)
-		return NULL;
-
-	data = qrcode->data;
-
-	/* wirte QR code to bitmap */
-	if ((bitmap = bitmap_new(qrcode->width + cqrconf.border * 2, qrcode->width + cqrconf.border * 2)) == NULL)
-		return NULL;
-	for (i = cqrconf.border; i < qrcode->width + cqrconf.border; i++)
-		for (j = cqrconf.border; j < qrcode->width + cqrconf.border; j++) {
-			bitmap->pixel[i * (qrcode->width + cqrconf.border * 2) + j] = !(*data & 0x1) * 0xff;
-			data++;
-		}
-
-	QRcode_free(qrcode);
-
-	if (cqrconf.scale == 1)
-		return bitmap;
-
-	/* cqrconf.scale bitmap */
-	if ((scaled = bitmap_new(bitmap->width * cqrconf.scale, bitmap->height * cqrconf.scale)) == NULL)
-		return NULL;
-	for (i = 0; i < bitmap->height; i++)
-		for (j = 0; j < bitmap->width; j++)
-			for (k = 0; k < cqrconf.scale; k++)
-				for (l = 0; l < cqrconf.scale; l++)
-					scaled->pixel[i * bitmap->width * cqrconf.scale * cqrconf.scale + k * bitmap->width * cqrconf.scale + j * cqrconf.scale + l] =
-						bitmap->pixel[i * bitmap->width + j];
-
-
-	bitmap_free(bitmap);
-
-	return scaled;
+	return png;
 }
 
 /*** get_query_value ***/
@@ -264,8 +283,8 @@ unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section,
 	return value;
 }
 
-/*** cqrconf_file ***/
-void cqrconf_file(const char * server_name, struct cqrconf_t * cqrconf) {
+/*** cqr_conf_file ***/
+void cqr_conf_file(const char * server_name, struct cqr_conf * conf) {
 	dictionary * ini;
 
 	/* parse config file */
@@ -274,34 +293,34 @@ void cqrconf_file(const char * server_name, struct cqrconf_t * cqrconf) {
 		return;
 	}
 
-	cqrconf->scale = get_ini_value(ini, 1, "general", "scale", cqrconf->scale, 1, QRCODE_MAX_SCALE);
-	cqrconf->border = get_ini_value(ini, 1, "general", "border", cqrconf->border, 0, QRCODE_MAX_BORDER);
-	cqrconf->level = get_ini_value(ini, 1, "general", "level", cqrconf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
-	cqrconf->overwrite = get_ini_value(ini, 0, "general", "allow overwrite", cqrconf->overwrite, false, true);
+	conf->scale = get_ini_value(ini, 1, "general", "scale", conf->scale, 1, QRCODE_MAX_SCALE);
+	conf->border = get_ini_value(ini, 1, "general", "border", conf->border, 0, QRCODE_MAX_BORDER);
+	conf->level = get_ini_value(ini, 1, "general", "level", conf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
+	conf->overwrite = get_ini_value(ini, 0, "general", "allow overwrite", conf->overwrite, false, true);
 
-	cqrconf->scale = get_ini_value(ini, 1, server_name, "scale", cqrconf->scale, 1, QRCODE_MAX_SCALE);
-	cqrconf->border = get_ini_value(ini, 1, server_name, "border", cqrconf->border, 0, QRCODE_MAX_BORDER);
-	cqrconf->level = get_ini_value(ini, 1, server_name, "level", cqrconf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
-	cqrconf->overwrite = get_ini_value(ini, 0, server_name, "allow overwrite", cqrconf->overwrite, false, true);
+	conf->scale = get_ini_value(ini, 1, server_name, "scale", conf->scale, 1, QRCODE_MAX_SCALE);
+	conf->border = get_ini_value(ini, 1, server_name, "border", conf->border, 0, QRCODE_MAX_BORDER);
+	conf->level = get_ini_value(ini, 1, server_name, "level", conf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
+	conf->overwrite = get_ini_value(ini, 0, server_name, "allow overwrite", conf->overwrite, false, true);
 
 	/* done reading config file, free */
 	iniparser_freedict(ini);
 }
 
-/*** cqrconf_string ***/
-void cqrconf_string(const char * query_string, struct cqrconf_t * cqrconf) {
-	if (cqrconf->overwrite == false)
+/*** cqr_conf_string ***/
+void cqr_conf_string(const char * query_string, struct cqr_conf * conf) {
+	if (conf->overwrite == false)
 		return;
 
 	if (query_string == NULL)
 		return;
 
 	/* do we have a special scale? */
-	cqrconf->scale = get_query_value(query_string, "scale", cqrconf->scale, 1, QRCODE_MAX_SCALE);
+	conf->scale = get_query_value(query_string, "scale", conf->scale, 1, QRCODE_MAX_SCALE);
 
 	/* width of the border? */
-	cqrconf->border = get_query_value(query_string, "border", cqrconf->border, 0, QRCODE_MAX_BORDER);
+	conf->border = get_query_value(query_string, "border", conf->border, 0, QRCODE_MAX_BORDER);
 
 	/* error correction level? */
-	cqrconf->level = get_query_value(query_string, "level", cqrconf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
+	conf->level = get_query_value(query_string, "level", conf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
 }

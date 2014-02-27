@@ -74,29 +74,22 @@ your custom needs. This is minimal sample source code:
     #include <libcqrlogo.h>
 
     int main(int argc, char **argv) {
-            struct bitmap_t * bitmap;
-            struct png_t * png;
-            struct cqrconf_t cqrconf;
+            struct cqr_png * png;
+            struct cqr_conf conf;
 
-            cqrconf.scale = 2;
-            cqrconf.border = 1;
-            cqrconf.level = 0;
-            cqrconf.overwrite = 1;
-
-            /* encode the QR-Code */
-            if ((bitmap = encode_qrcode("https://github.com/eworm-de/cqrlogo", cqrconf)) == NULL) {
-                    fprintf(stderr, "Could not generate QR-Code.\n");
-                    return EXIT_FAILURE;
-            }
+            conf.scale = 2;
+            conf.border = 1;
+            conf.level = 0;
+            conf.overwrite = 1;
 
             /* generate PNG data */
-            if ((png = generate_png(bitmap, CQR_COMMENT|CQR_VERSION|CQR_LIBVERSION, "https://github.com/eworm-de/cqrlogo")) == NULL) {
+            if ((png = cqr_encode_qrcode_to_png("https://github.com/eworm-de/cqrlogo", conf, CQR_META_ALL)) == NULL) {
                     fprintf(stderr, "Failed to generate PNG.\n");
                     return EXIT_FAILURE;
             }
 
             /* print HTTP header */
-            printf("Content-Type: image/png\n\n");
+            printf(cqr_mimeheader);
 
             /* write PNG data to stdout */
             if (fwrite(png->buffer, png->size, 1, stdout) != 1) {
@@ -105,7 +98,6 @@ your custom needs. This is minimal sample source code:
             }
 
             /* free memory we no longer need */
-            bitmap_free(bitmap);
             if (png->size > 0)
                     free(png->buffer);
             free(png);
