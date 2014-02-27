@@ -40,7 +40,7 @@ struct cqr_conf {
 	bool overwrite;
 };
 
-const char * cqr_mimeheader = "Content-Type: image/png\n\n";
+#define CQR_MIMEHEADER	 "Content-Type: image/png\n\n"
 
 #define CQR_META_COMMENT	0x1
 #define CQR_META_REFERER	0x2
