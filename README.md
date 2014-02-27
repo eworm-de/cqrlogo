@@ -89,7 +89,7 @@ your custom needs. This is minimal sample source code:
             }
 
             /* print HTTP header */
-            fputs(cqr_mimeheader, stdout);
+            fputs(CQR_MIMEHEADER, stdout);
 
             /* write PNG data to stdout */
             if (fwrite(png->buffer, png->size, 1, stdout) != 1) {
