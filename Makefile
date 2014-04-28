@@ -22,7 +22,7 @@ CQRLOGO_CGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.cgi
 CQRLOGO_FCGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.fcgi
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
-VERSION := 0.5.0
+VERSION := 0.5.1
 # library abi version
 SOVERSION	:= 0
 
