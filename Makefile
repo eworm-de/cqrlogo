@@ -2,7 +2,7 @@
 
 # pathes
 PREFIX		:= /usr
-APACHECONF	:= /etc/apache/conf/extra/
+APACHECONF	:= /etc/httpd/conf/extra/
 LIGHTTPDCONF	:= /etc/lighttpd/conf.d/
 # commands
 CC	:= gcc
