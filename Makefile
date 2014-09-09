@@ -17,6 +17,11 @@ SED	:= sed
 ZBARIMG	:= zbarimg
 # flags
 CFLAGS	+= -O2 -Wall -Werror
+CFLAGSSTATIC	= $(CFLAGS)
+CFLAGSSTATIC	+= -liniparser
+CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libpng)
+CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs zlib)
+CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libqrencode)
 # calls to compiled binary files
 CQRLOGO_CGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.cgi
 CQRLOGO_FCGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.fcgi
@@ -28,14 +33,25 @@ SOVERSION	:= 0
 
 all: lib/libcqrlogo.so cqrlogo.cgi cqrlogo.fcgi README.html cqrlogo.png
 
-lib/libcqrlogo.so: lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
-	SOVERSION=$(SOVERSION) $(MAKE) -C lib
+static: cqrlogo.cgi.static cqrlogo.fcgi.static
+
+lib/libcqrlogo.so: lib/Makefile lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
+	SOVERSION=$(SOVERSION) $(MAKE) -C lib libcqrlogo.so
+
+lib/libcqrlogo.o: lib/Makefile lib/libcqrlogo.c lib/libcqrlogo.h config.h version.h
+	$(MAKE) -C lib libcqrlogo.o
 
 cqrlogo.cgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
 	$(CC) $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
 
+cqrlogo.cgi.static: lib/libcqrlogo.o cqrlogo.c cqrlogo.h config.h version.h
+	$(CC) $(CFLAGSSTATIC) -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi.static cqrlogo.c lib/libcqrlogo.o
+
 cqrlogo.fcgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
 	$(CC) $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
+
+cqrlogo.fcgi.static: lib/libcqrlogo.o cqrlogo.c cqrlogo.h config.h version.h
+	$(CC) $(CFLAGSSTATIC) -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi.static cqrlogo.c lib/libcqrlogo.o
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
 	echo "#ifndef VERSION" > $@
@@ -251,10 +267,12 @@ check:
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 clean:
-	$(RM) -f *.o *~ *.png README.html lib/libcqrlogo.so lib/libcqrlogo.so.* cqrlogo.cgi cqrlogo.fcgi version.h
+	$(RM) -f *.png README.html cqrlogo.cgi cqrlogo.fcgi cqrlogo.cgi.static cqrlogo.fcgi.static version.h
+	$(MAKE) -C lib clean
 
 distclean:
-	$(RM) -f *.o *~ *.png README.html lib/libcqrlogo.so lib/libcqrlogo.so.* cqrlogo.cgi cqrlogo.fcgi version.h config.h
+	$(RM) -f *~ *.png README.html cqrlogo.cgi cqrlogo.fcgi cqrlogo.cgi.static cqrlogo.fcgi.static version.h config.h
+	$(MAKE) -C lib distclean
 
 release:
 	git archive --format=tar.xz --prefix=cqrlogo-$(VERSION)/ $(VERSION) > cqrlogo-$(VERSION).tar.xz
