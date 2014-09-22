@@ -14,6 +14,7 @@ LN	:= ln
 MD	:= markdown
 RM	:= rm
 SED	:= sed
+PNGCHK	:= pngcheck
 ZBARIMG	:= zbarimg
 # flags
 CFLAGS	+= -O2 -Wall -Werror
@@ -95,11 +96,13 @@ check:
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^https://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -107,6 +110,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -114,6 +118,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -121,6 +126,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -128,6 +134,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -135,6 +142,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -142,6 +150,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -149,6 +158,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -156,6 +166,7 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -163,12 +174,14 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=eworm.net HTTP_REFERER=http://$(SERVER)/ \
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | \
 		$(GREP) -e '^This QR Code has been stolen from http://eworm.net/!$$'
 
@@ -176,17 +189,20 @@ check:
 		$(CQRLOGO_CGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | \
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=https://$(SERVER)/ HTTPS=on \
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^https://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -194,6 +210,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -201,6 +218,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -208,6 +226,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -215,6 +234,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -222,6 +242,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -229,6 +250,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -236,6 +258,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -243,6 +266,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=$(SERVER) HTTP_REFERER=http://$(SERVER)/ \
@@ -250,12 +274,14 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | $(GREP) -e '^http://$(SERVER)/$$'
 
 	SERVER_NAME=eworm.net HTTP_REFERER=http://$(SERVER)/ \
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | \
 		$(GREP) -e '^This QR Code has been stolen from http://eworm.net/!$$'
 
@@ -263,6 +289,7 @@ check:
 		$(CQRLOGO_FCGI) | $(SED) '1,/^$$/d' > \
 		check.png
 	$(FILE) check.png | $(GREP) 'PNG image data'
+	$(PNGCHK) check.png
 	$(ZBARIMG) --raw -q check.png | \
 		$(GREP) -e '^This QR Code has been stolen from https://eworm.net/!$$'
 
