@@ -110,3 +110,8 @@ Save this code to `cqrlogo.c` and run:
 > gcc -lcqrlogo -o cqrlogo.cgi cqrlogo.c
 
 This will result in a CGI executable `cqrlogo.cgi`.
+
+### Upstream
+
+URL: [GitHub.com](https://github.com/eworm-de/cqrlogo)  
+Mirror: [eworm.de](http://git.eworm.de/cgit.cgi/cqrlogo/)
