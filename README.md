@@ -41,12 +41,24 @@ followed by:
 
 > make install
 
-This will place an executable at `/usr/lib/cqrlogo/cqrlogo`,
-documentation can be found in `/usr/share/doc/cqrlogo/`.
+This will place a shared library at `/usr/lib/libcqrlogo.so`, an
+executable at `/usr/lib/cqrlogo/cqrlogo` and documentation can be found in
+`/usr/share/doc/cqrlogo/`.
 
 The file `config.h` (copy from `config.def.h` if it does not exist) provides
 some build time configuration, so feel free to make your changes there and
 rerun the commands above.
+
+### Static build
+
+In case you do not like the shared library `libcqrlogo.so` for whatever
+reason you can build a statically linked version:
+
+> make static
+
+However there is no install routine for the static build. Please note
+that this is still dynamically linked to `libpng`, `libz`,
+`libiniparser` and `libqrencode`.
 
 Usage
 -----
