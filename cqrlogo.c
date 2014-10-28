@@ -102,7 +102,10 @@ int main(int argc, char **argv) {
 		}
 
 		/* print HTTP header */
-		fputs(CQR_MIMEHEADER, stdout);
+		fputs(CQR_HEADER_CONTENT_TYPE, stdout);
+		fputs(CQR_HEADER_CONTENT_DISPOSITION, stdout);
+		fputs(CQR_HEADER_PRAGMA, stdout);
+		fputc('\n', stdout);
 
 		/* write PNG data to stdout */
 		if (fwrite(png->buffer, png->size, 1, stdout) != 1) {

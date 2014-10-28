@@ -101,7 +101,8 @@ your custom needs. This is minimal sample source code:
             }
 
             /* print HTTP header */
-            fputs(CQR_MIMEHEADER, stdout);
+            fputs(CQR_HEADER_CONTENT_TYPE, stdout);
+            fputc('\n', stdout);
 
             /* write PNG data to stdout */
             if (fwrite(png->buffer, png->size, 1, stdout) != 1) {

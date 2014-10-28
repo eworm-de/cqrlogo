@@ -42,7 +42,9 @@ struct cqr_conf {
 	bool overwrite;
 };
 
-#define CQR_MIMEHEADER	 "Content-Type: image/png\n\n"
+#define CQR_HEADER_CONTENT_TYPE		"Content-Type: image/png\n"
+#define CQR_HEADER_CONTENT_DISPOSITION	"Content-Disposition: inline; filename=\"cqrlogo.png\"\n"
+#define CQR_HEADER_PRAGMA		"Pragma: no-cache\n"
 
 #define CQR_META_COMMENT	0x1
 #define CQR_META_REFERER	0x2
