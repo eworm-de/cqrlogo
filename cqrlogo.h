@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <regex.h>
 #include <stdbool.h>
+#include <sys/time.h>
 
 #if HAVE_FCGI
 #include <fcgi_stdio.h>

@@ -42,6 +42,7 @@ struct cqr_conf {
 	bool overwrite;
 };
 
+#define CQR_HEADER_CACHE_CONTROL	"Cache-Control: no-cache\nCache-Control: max-age=0\n"
 #define CQR_HEADER_CONTENT_TYPE		"Content-Type: image/png\n"
 #define CQR_HEADER_CONTENT_DISPOSITION	"Content-Disposition: inline; filename=\"cqrlogo.png\"\n"
 #define CQR_HEADER_PRAGMA		"Pragma: no-cache\n"

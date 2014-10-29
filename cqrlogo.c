@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
 	regex_t preg;
 	regmatch_t pmatch[1];
 	uint8_t https;
+	struct timeval tv;
 
 	struct cqr_png * png;
 	struct cqr_bitmap * bitmap;
@@ -104,7 +105,10 @@ int main(int argc, char **argv) {
 		/* print HTTP header */
 		fputs(CQR_HEADER_CONTENT_TYPE, stdout);
 		fputs(CQR_HEADER_CONTENT_DISPOSITION, stdout);
+		fputs(CQR_HEADER_CACHE_CONTROL, stdout);
 		fputs(CQR_HEADER_PRAGMA, stdout);
+		gettimeofday(&tv, NULL);
+		fprintf(stdout, "ETag: %lu%lu\n", tv.tv_sec, tv.tv_usec);
 		fputc('\n', stdout);
 
 		/* write PNG data to stdout */
