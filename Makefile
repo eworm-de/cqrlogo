@@ -17,7 +17,7 @@ SED	:= sed
 PNGCHK	:= pngcheck
 ZBARIMG	:= zbarimg
 # flags
-CFLAGS	+= -std=c11 -O2 -Wall -Werror
+CFLAGS	+= -std=c11 -O2 -fpic -pie -Wall -Werror
 CFLAGSSTATIC	= $(CFLAGS)
 CFLAGSSTATIC	+= -liniparser
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libpng)

@@ -2,7 +2,7 @@
 
 CC	:= gcc
 LN	:= ln
-CFLAGS	+= -std=c11 -O2 -Wall -Werror
+CFLAGS	+= -std=c11 -O2 -fpic -pie -Wall -Werror
 CFLAGS	+= -liniparser
 CFLAGS	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGS	+= $(shell pkg-config --cflags --libs zlib)
