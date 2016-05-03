@@ -4,6 +4,7 @@
 PREFIX		:= /usr
 APACHECONF	:= /etc/httpd/conf/extra/
 LIGHTTPDCONF	:= /etc/lighttpd/conf.d/
+
 # commands
 CC	:= gcc
 CP	:= cp
@@ -16,19 +17,24 @@ RM	:= rm
 SED	:= sed
 PNGCHK	:= pngcheck
 ZBARIMG	:= zbarimg
+
 # flags
-CFLAGS	+= -std=c11 -O2 -fpic -pie -Wall -Werror
+CFLAGS	+= -std=c11 -O2 -fPIC -Wall -Werror
 CFLAGSSTATIC	= $(CFLAGS)
 CFLAGSSTATIC	+= -liniparser
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libqrencode)
+LDFLAGS	+= -Wl,-z,now -Wl,-z,relro -pie
+
 # calls to compiled binary files
 CQRLOGO_CGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.cgi
 CQRLOGO_FCGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.fcgi
+
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
 VERSION := 0.5.3
+
 # library abi version
 SOVERSION	:= 0
 
