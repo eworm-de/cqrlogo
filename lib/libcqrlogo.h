@@ -77,8 +77,8 @@ struct cqr_png * cqr_bitmap_to_png(struct cqr_bitmap *bitmap, const char *text, 
 /*** cqr_encode_qrcode_to_png ***/
 struct cqr_png * cqr_encode_qrcode_to_png(const char *text, const struct cqr_conf conf, const uint8_t meta);
 
-/*** cqr_get_query_value ***/
-unsigned int cqr_get_query_value(const char *query_string, const char *pattern,
+/*** cqr_get_query_uint ***/
+unsigned int cqr_get_query_uint(const char *query_string, const char *pattern,
 	unsigned int value, unsigned int min, unsigned int max);
 /*** cqr_get_ini_value ***/
 unsigned int cqr_get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,

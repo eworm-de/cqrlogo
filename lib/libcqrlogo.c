@@ -233,8 +233,8 @@ struct cqr_png * cqr_encode_qrcode_to_png(const char *text, const struct cqr_con
 	return png;
 }
 
-/*** get_query_value ***/
-unsigned int get_query_value(const char *query_string, const char *pattern,
+/*** cqr_get_query_uint ***/
+unsigned int cqr_get_query_uint(const char *query_string, const char *pattern,
 		unsigned int value, unsigned int min, unsigned int max) {
 	char *match = NULL, *newpattern = NULL;
 	unsigned int length;
@@ -316,11 +316,11 @@ void cqr_conf_string(const char * query_string, struct cqr_conf * conf) {
 		return;
 
 	/* do we have a special scale? */
-	conf->scale = get_query_value(query_string, "scale", conf->scale, 1, QRCODE_MAX_SCALE);
+	conf->scale = cqr_get_query_uint(query_string, "scale", conf->scale, 1, QRCODE_MAX_SCALE);
 
 	/* width of the border? */
-	conf->border = get_query_value(query_string, "border", conf->border, 0, QRCODE_MAX_BORDER);
+	conf->border = cqr_get_query_uint(query_string, "border", conf->border, 0, QRCODE_MAX_BORDER);
 
 	/* error correction level? */
-	conf->level = get_query_value(query_string, "level", conf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
+	conf->level = cqr_get_query_uint(query_string, "level", conf->level, QR_ECLEVEL_L, QR_ECLEVEL_H);
 }
