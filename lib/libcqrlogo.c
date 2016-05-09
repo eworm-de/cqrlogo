@@ -261,6 +261,28 @@ unsigned int cqr_get_query_uint(const char *query_string, const char *pattern,
 	return value;
 }
 
+/*** get_query_char ***/
+char * cqr_get_query_char(const char *query_string, const char *pattern) {
+	char *value = NULL, *cut = NULL;
+	const char *tmp =  NULL, *match = NULL;
+
+	if ((match = strstr(query_string, pattern)) == NULL)
+		return NULL;
+
+	if ((tmp = strchr(match, '=')) == NULL)
+		return NULL;
+
+	if (strlen(tmp) < 1)
+		return NULL;
+
+	value = strdup(tmp + 1);
+
+	if ((cut = strchr(value, '&')) != NULL)
+		*cut = '\0';
+
+	return value;
+}
+
 /*** get_ini_value ***/
 unsigned int get_ini_value(dictionary * ini, uint8_t type, const char * section, const char * parameter,
 		unsigned int value, unsigned int min, unsigned int max) {
