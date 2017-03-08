@@ -127,4 +127,4 @@ This will result in a CGI executable `cqrlogo.cgi`.
 ### Upstream
 
 URL: [GitHub.com](https://github.com/eworm-de/cqrlogo)  
-Mirror: [eworm.de](http://git.eworm.de/cgit.cgi/cqrlogo/)
+Mirror: [eworm.de](https://git.eworm.de/cgit.cgi/cqrlogo/)
