@@ -62,7 +62,7 @@ cqrlogo.fcgi.static: lib/libcqrlogo.o cqrlogo.c cqrlogo.h config.h version.h
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
 	echo "#ifndef VERSION" > $@
-	echo "#define VERSION \"$(shell git describe --tags --long 2>/dev/null || echo ${VERSION})\"" >> $@
+	echo "#define VERSION \"$(shell git describe --long 2>/dev/null || echo ${VERSION})\"" >> $@
 	echo "#endif" >> $@
 
 config.h: config.def.h
