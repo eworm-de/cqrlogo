@@ -27,7 +27,7 @@ successfully compile.
 Some systems may require additional development packages for the libraries.
 Look for `libpng-dev`, `libz-dev` and `libqrencode-dev` or similar.
 
-For `make check` to work you have to install optional dependency 
+For `make check` to work you have to install optional dependency
 [zbar](http://zbar.sourceforge.net/).
 
 Build and install
@@ -127,8 +127,8 @@ This will result in a CGI executable `cqrlogo.cgi`.
 ### Upstream
 
 URL:
-[GitHub.com](https://github.com/eworm-de/cqrlogo#cqrlogo)  
+[GitHub.com](https://github.com/eworm-de/cqrlogo#cqrlogo)
 
 Mirror:
 [eworm.de](https://git.eworm.de/cgit.cgi/cqrlogo/)
-[GitHub.com](https://github.com/eworm-de/cqrlogo#cqrlogo)  
+[GitHub.com](https://github.com/eworm-de/cqrlogo#cqrlogo)
