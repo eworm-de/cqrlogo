@@ -14,12 +14,12 @@ Requirements
 
 To compile and run `cqrlogo` you need:
 
-* [iniparser](http://ndevilla.free.fr/iniparser/)
+* [iniparser](https://github.com/ndevilla/iniparser)
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
-* [zlib](http://www.zlib.net/) (which is a dependency for libpng)
-* [qrencode](http://megaui.net/fukuchi/works/qrencode/index.en.html)
+* [zlib](https://www.zlib.net/) (which is a dependency for libpng)
+* [qrencode](https://fukuchi.org/works/qrencode/)
 * [fcgi](http://www.fastcgi.com/) (for FastCGI support)
-* [markdown](http://daringfireball.net/projects/markdown/) (HTML documentation)
+* [markdown](https://daringfireball.net/projects/markdown/) (HTML documentation)
 
 Additionally it is expected to have `make` and `pkg-config` around to
 successfully compile.
