@@ -307,5 +307,5 @@ distclean:
 
 release:
 	git archive --format=tar.xz --prefix=cqrlogo-$(VERSION)/ $(VERSION) > cqrlogo-$(VERSION).tar.xz
-	gpg -ab cqrlogo-$(VERSION).tar.xz
-	git notes --ref=refs/notes/signatures/tar add -C $$(git archive --format=tar --prefix=cqrlogo-$(VERSION)/ $(VERSION) | gpg --armor --detach-sign | git hash-object -w --stdin) $(VERSION)
+	gpg --armor --detach-sign --comment cqrlogo-$(VERSION).tar.xz cqrlogo-$(VERSION).tar.xz
+	git notes --ref=refs/notes/signatures/tar add -C $$(git archive --format=tar --prefix=cqrlogo-$(VERSION)/ $(VERSION) | gpg --armor --detach-sign --comment cqrlogo-$(VERSION).tar | git hash-object -w --stdin) $(VERSION)
