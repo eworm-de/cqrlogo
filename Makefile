@@ -49,16 +49,16 @@ lib/libcqrlogo.o: lib/Makefile lib/libcqrlogo.c lib/libcqrlogo.h config.h versio
 	$(MAKE) -C lib libcqrlogo.o
 
 cqrlogo.cgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
-	$(CC) $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi cqrlogo.c
+	$(CC) cqrlogo.c $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi
 
 cqrlogo.cgi.static: lib/libcqrlogo.o cqrlogo.c cqrlogo.h config.h version.h
-	$(CC) $(CFLAGSSTATIC) -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi.static cqrlogo.c lib/libcqrlogo.o
+	$(CC) cqrlogo.c lib/libcqrlogo.o  $(CFLAGSSTATIC) -Ilib/ $(LDFLAGS) -DHAVE_FCGI=0 -o cqrlogo.cgi.static
 
 cqrlogo.fcgi: lib/libcqrlogo.so cqrlogo.c cqrlogo.h config.h version.h
-	$(CC) $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi cqrlogo.c
+	$(CC) cqrlogo.c $(CFLAGS) -lcqrlogo -Llib/ -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi
 
 cqrlogo.fcgi.static: lib/libcqrlogo.o cqrlogo.c cqrlogo.h config.h version.h
-	$(CC) $(CFLAGSSTATIC) -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi.static cqrlogo.c lib/libcqrlogo.o
+	$(CC) cqrlogo.c lib/libcqrlogo.o $(CFLAGSSTATIC) -Ilib/ -lfcgi $(LDFLAGS) -DHAVE_FCGI=1 -o cqrlogo.fcgi.static
 
 version.h: $(wildcard .git/HEAD .git/index .git/refs/tags/*) Makefile
 	printf "#ifndef VERSION\n#define VERSION \"%s\"\n#endif\n" $(shell git describe --long 2>/dev/null || echo ${VERSION}) > $@

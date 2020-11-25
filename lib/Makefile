@@ -15,10 +15,10 @@ LDFLAGS	+= -Wl,-z,now -Wl,-z,relro -pie
 all: libcqrlogo.so
 
 libcqrlogo.o: libcqrlogo.c libcqrlogo.h ../config.h ../version.h Makefile
-	$(CC) $(CFLAGS) -c -o libcqrlogo.o libcqrlogo.c
+	$(CC) libcqrlogo.c $(CFLAGS) -c -o libcqrlogo.o
 
 libcqrlogo.so: libcqrlogo.c libcqrlogo.h ../config.h ../version.h Makefile
-	$(CC) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,libcqrlogo.so.$(SOVERSION) -o libcqrlogo.so.$(SOVERSION) libcqrlogo.c
+	$(CC) libcqrlogo.c $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,libcqrlogo.so.$(SOVERSION) -o libcqrlogo.so.$(SOVERSION)
 	$(LN) -sf libcqrlogo.so.$(SOVERSION) libcqrlogo.so
 
 clean:
