@@ -6,7 +6,7 @@ LN	:= ln
 
 # flags
 CFLAGS	+= -std=c11 -O2 -fPIC -Wall -Werror
-CFLAGS	+= -liniparser
+CFLAGS	+= $(shell pkg-config --cflags --libs iniparser)
 CFLAGS	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGS	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGS	+= $(shell pkg-config --cflags --libs libqrencode)

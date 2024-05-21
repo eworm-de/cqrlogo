@@ -21,7 +21,7 @@ ZBARIMG	:= zbarimg
 # flags
 CFLAGS	+= -std=c11 -O2 -fPIC -Wall -Werror
 CFLAGSSTATIC	= $(CFLAGS)
-CFLAGSSTATIC	+= -liniparser
+CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs iniparser)
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libpng)
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs zlib)
 CFLAGSSTATIC	+= $(shell pkg-config --cflags --libs libqrencode)

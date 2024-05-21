@@ -30,7 +30,7 @@
 #include <png.h>
 #include <zlib.h>
 #include <qrencode.h>
-#include <iniparser.h>
+#include <iniparser/iniparser.h>
 
 /* a bitmap */
 struct cqr_bitmap {
