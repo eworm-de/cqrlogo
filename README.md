@@ -1,6 +1,10 @@
 cqrlogo
 =======
 
+[![GitHub stars](https://img.shields.io/github/stars/eworm-de/cqrlogo?logo=GitHub&style=flat&color=red)](https://github.com/eworm-de/cqrlogo/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/eworm-de/cqrlogo?logo=GitHub&style=flat&color=green)](https://github.com/eworm-de/cqrlogo/network)
+[![GitHub watchers](https://img.shields.io/github/watchers/eworm-de/cqrlogo?logo=GitHub&style=flat&color=blue)](https://github.com/eworm-de/cqrlogo/watchers)
+
 **CGI QR-Code logo**
 
 The resulting QR-Code should look something like this:
