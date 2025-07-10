@@ -13,17 +13,21 @@ The resulting QR-Code should look something like this:
 
 It is generated dynamically from referer URL sent by the user agent.
 
+*Use at your own risk*, pay attention to
+[license and warranty](#license-and-warranty), and
+[disclaimer on external links](#disclaimer-on-external-links)!
+
 Requirements
 ------------
 
 To compile and run `cqrlogo` you need:
 
-* [iniparser](https://github.com/ndevilla/iniparser)
-* [libpng](http://www.libpng.org/pub/png/libpng.html)
-* [zlib](https://www.zlib.net/) (which is a dependency for libpng)
-* [qrencode](https://fukuchi.org/works/qrencode/)
-* [fcgi](http://www.fastcgi.com/) (for FastCGI support)
-* [markdown](https://daringfireball.net/projects/markdown/) (HTML documentation)
+* [iniparser ↗️](https://github.com/ndevilla/iniparser)
+* [libpng ↗️](https://www.libpng.org/pub/png/libpng.html)
+* [zlib ↗️](https://www.zlib.net/) (which is a dependency for libpng)
+* [qrencode ↗️](https://fukuchi.org/works/qrencode/)
+* [fcgi ↗️](https://github.com/FastCGI-Archives/fcgi2) (for FastCGI support)
+* [markdown ↗️](https://daringfireball.net/projects/markdown/) (HTML documentation)
 
 Additionally it is expected to have `make` and `pkg-config` around to
 successfully compile.
@@ -32,7 +36,7 @@ Some systems may require additional development packages for the libraries.
 Look for `libpng-dev`, `libz-dev` and `libqrencode-dev` or similar.
 
 For `make check` to work you have to install optional dependency
-[zbar](http://zbar.sourceforge.net/).
+[zbar ↗️](https://zbar.sourceforge.net/).
 
 Build and install
 -----------------
@@ -140,6 +144,21 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 [GNU General Public License](COPYING.md) for more details.
+
+Disclaimer on external links
+----------------------------
+
+Our website contains links to the websites of third parties ("external
+links"). As the content of these websites is not under our control, we
+cannot assume any liability for such external content. In all cases, the
+provider of information of the linked websites is liable for the content
+and accuracy of the information provided. At the point in time when the
+links were placed, no infringements of the law were recognisable to us.
+As soon as an infringement of the law becomes known to us, we will
+immediately remove the link in question.
+
+> 💡️ **Hint**: All external links are marked with an arrow pointing
+> diagonally in an up-right (or north-east) direction (↗️).
 
 ### Upstream
 
