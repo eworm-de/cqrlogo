@@ -43,11 +43,11 @@ Build and install
 
 Building and installing is very easy. Just run:
 
-> make
+    make
 
 followed by:
 
-> make install
+    make install
 
 This will place a shared library at `/usr/lib/libcqrlogo.so`, an
 executable at `/usr/lib/cqrlogo/cqrlogo` and documentation can be found in
@@ -62,7 +62,7 @@ rerun the commands above.
 In case you do not like the shared library `libcqrlogo.so` for whatever
 reason you can build a statically linked version:
 
-> make static
+    make static
 
 However there is no install routine for the static build. Please note
 that this is still dynamically linked to `libpng`, `libz`,
@@ -128,7 +128,7 @@ your custom needs. This is minimal sample source code:
 
 Save this code to `cqrlogo.c` and run:
 
-> gcc -lcqrlogo -o cqrlogo.cgi cqrlogo.c
+    gcc -lcqrlogo -o cqrlogo.cgi cqrlogo.c
 
 This will result in a CGI executable `cqrlogo.cgi`.
 
