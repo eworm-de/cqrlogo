@@ -33,7 +33,8 @@ CQRLOGO_FCGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.fcgi
 
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
-VERSION := 0.5.5
+DISTVER := 0.5.5
+VERSION ?= $(shell git describe --long 2>/dev/null || echo $(DISTVER))
 
 # library abi version
 SOVERSION	:= 0
@@ -306,6 +307,6 @@ distclean:
 	$(MAKE) -C lib distclean
 
 release:
-	git archive --format=tar.xz --prefix=cqrlogo-$(VERSION)/ $(VERSION) > cqrlogo-$(VERSION).tar.xz
-	gpg --armor --detach-sign --comment cqrlogo-$(VERSION).tar.xz cqrlogo-$(VERSION).tar.xz
-	git notes --ref=refs/notes/signatures/tar add -C $$(git archive --format=tar --prefix=cqrlogo-$(VERSION)/ $(VERSION) | gpg --armor --detach-sign --comment cqrlogo-$(VERSION).tar | git hash-object -w --stdin) $(VERSION)
+	git archive --format=tar.xz --prefix=cqrlogo-$(DISTVER)/ $(DISTVER) > cqrlogo-$(DISTVER).tar.xz
+	gpg --armor --detach-sign --comment cqrlogo-$(DISTVER).tar.xz cqrlogo-$(DISTVER).tar.xz
+	git notes --ref=refs/notes/signatures/tar add -C $$(git archive --format=tar --prefix=cqrlogo-$(DISTVER)/ $(DISTVER) | gpg --armor --detach-sign --comment cqrlogo-$(DISTVER).tar | git hash-object -w --stdin) $(DISTVER)
