@@ -48,5 +48,3 @@
  * a numeric value from 0 to 3 */
 
 #endif /* _CONFIG_H */
-
-// vim: set syntax=c:

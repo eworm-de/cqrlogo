@@ -42,5 +42,3 @@
 int main(int argc, char **argv);
 
 #endif /* _CQRLOGO_H */
-
-// vim: set syntax=c:

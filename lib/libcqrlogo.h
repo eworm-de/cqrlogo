@@ -103,5 +103,3 @@ void cqr_conf_file(const char * server_name, struct cqr_conf * conf);
 void cqr_conf_string(const char * query_string, struct cqr_conf * conf);
 
 #endif /* _LIBCQRLOGO_H */
-
-// vim: set syntax=c:
