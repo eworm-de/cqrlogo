@@ -247,7 +247,8 @@ struct cqr_png * cqr_encode_qrcode_to_png(const char *text, const struct cqr_con
 /*** cqr_get_query_uint ***/
 unsigned int cqr_get_query_uint(const char *query_string, const char *pattern,
 		unsigned int value, unsigned int min, unsigned int max) {
-	char *match = NULL, *newpattern = NULL;
+	const char *match = NULL;
+	char *newpattern = NULL;
 	unsigned int length;
 	int tmp = -1;
 
