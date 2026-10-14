@@ -33,7 +33,7 @@ CQRLOGO_FCGI	+= LD_LIBRARY_PATH=lib/ ./cqrlogo.fcgi
 
 # this is just a fallback in case you do not use git but downloaded
 # a release tarball...
-DISTVER := 0.5.5
+DISTVER := 0.5.6
 VERSION ?= $(shell git describe --long 2>/dev/null || echo $(DISTVER))
 
 # library abi version
